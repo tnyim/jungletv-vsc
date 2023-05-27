@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"strictNullChecks": true,
+		"module": "commonjs",
+		"target": "es2020",
+		"lib": [
+			"es2020",
+			"WebWorker"
+		],
+		"outDir": "dist",
+		"sourceMap": true,
+		"strict": true,
+		"rootDir": "src",
+		"moduleResolution": "nodenext",
+	},
+	"include": [
+		"src/**/*.ts",
+		"./node_modules/vscode/vscode.d.ts",
+		"./node_modules/vscode/lib/*",
+	]
+}

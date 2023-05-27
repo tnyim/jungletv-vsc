@@ -1,0 +1,306 @@
+{
+	"name": "jungletv-vsc",
+	"displayName": "JungleTV AF development helper",
+	"description": "Helper for developing applications targeting the JungleTV Application Framework",
+	"version": "0.1.0",
+	"publisher": "jungletv-team",
+	"private": true,
+	"license": "Apache 2.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tnyim/jungletv"
+	},
+	"engines": {
+		"vscode": "^1.74.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onFileSystem:jungletvaf",
+		"onCommand:workbench.action.tasks.runTask",
+		"onDebug",
+		"onStartupFinished"
+	],
+	"browser": "./dist/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "jungletvaf.testCommand",
+				"title": "Generic test command",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.configureNewEnvironment",
+				"title": "Configure New Environment",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.forgetEnvironment",
+				"title": "Forget Environment",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.editApplication",
+				"title": "Add Application to Workspace",
+				"category": "JungleTV AF",
+				"enablement": "jungletvaf.hasConfiguredEnvironments"
+			},
+			{
+				"command": "jungletvaf.launchApplication",
+				"title": "Launch Application",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.launchAndAttachToApplication",
+				"title": "Launch and Attach to Application",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.attachToApplication",
+				"title": "Attach to Application",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.restartApplication",
+				"title": "Restart Application",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.stopApplication",
+				"title": "Stop Application",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.openApplicationEditorInBrowser",
+				"title": "Edit in Browser",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.makeFilePublic",
+				"title": "Make File Public",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.makeFileInternal",
+				"title": "Make File Internal",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.setFileMimeType",
+				"title": "Set MIME Type...",
+				"category": "JungleTV AF"
+			},
+			{
+				"command": "jungletvaf.debug.openConsoleInBrowser",
+				"title": "Open Console in Browser",
+				"category": "JungleTV AF",
+				"icon": "$(debug-console)"
+			}
+		],
+		"menus": {
+			"commandPalette": [
+				{
+					"command": "jungletvaf.testCommand"
+				},
+				{
+					"command": "jungletvaf.configureNewEnvironment",
+					"when": "true"
+				},
+				{
+					"command": "jungletvaf.forgetEnvironment",
+					"when": "true"
+				},
+				{
+					"command": "jungletvaf.editApplication",
+					"when": "jungletvaf.hasConfiguredEnvironments"
+				},
+				{
+					"command": "jungletvaf.launchApplication",
+					"when": "false"
+				},
+				{
+					"command": "jungletvaf.launchAndAttachToApplication",
+					"when": "false"
+				},
+				{
+					"command": "jungletvaf.attachToApplication",
+					"when": "false"
+				},
+				{
+					"command": "jungletvaf.restartApplication",
+					"when": "false"
+				},
+				{
+					"command": "jungletvaf.stopApplication",
+					"when": "false"
+				},
+				{
+					"command": "jungletvaf.openApplicationEditorInBrowser",
+					"when": "false"
+				},
+				{
+					"command": "jungletvaf.makeFilePublic",
+					"when": "false"
+				},
+				{
+					"command": "jungletvaf.makeFileInternal",
+					"when": "false"
+				},
+				{
+					"command": "jungletvaf.setFileMimeType",
+					"when": "false"
+				},
+				{
+					"command": "jungletvaf.debug.openConsoleInBrowser",
+					"when": "false"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "jungletvaf.launchApplication",
+					"group": "jungletvaf_01_manage_application_execution",
+					"when": "explorerResourceIsFolder && resourceScheme == jungletvaf && resourcePath =~ /^\\/[^/]+$/ && resource not in jungletvaf.runningApplications && resource in jungletvaf.launchableApplications"
+				},
+				{
+					"command": "jungletvaf.launchAndAttachToApplication",
+					"group": "jungletvaf_01_manage_application_execution",
+					"when": "explorerResourceIsFolder && resourceScheme == jungletvaf && resourcePath =~ /^\\/[^/]+$/ && resource not in jungletvaf.runningApplications && resource in jungletvaf.launchableApplications"
+				},
+				{
+					"command": "jungletvaf.restartApplication",
+					"group": "jungletvaf_01_manage_application_execution",
+					"when": "explorerResourceIsFolder && resourceScheme == jungletvaf && resourcePath =~ /^\\/[^/]+$/ && resource in jungletvaf.runningApplications && resource in jungletvaf.launchableApplications"
+				},
+				{
+					"command": "jungletvaf.attachToApplication",
+					"group": "jungletvaf_01_manage_application_execution",
+					"when": "explorerResourceIsFolder && resourceScheme == jungletvaf && resourcePath =~ /^\\/[^/]+$/ && resource in jungletvaf.runningApplications && resource in jungletvaf.launchableApplications"
+				},
+				{
+					"command": "jungletvaf.stopApplication",
+					"group": "jungletvaf_01_manage_application_execution",
+					"when": "explorerResourceIsFolder && resourceScheme == jungletvaf && resourcePath =~ /^\\/[^/]+$/ && resource in jungletvaf.runningApplications"
+				},
+				{
+					"command": "jungletvaf.openApplicationEditorInBrowser",
+					"group": "7_modification",
+					"when": "explorerResourceIsFolder && resourceScheme == jungletvaf && resourcePath =~ /^\\/[^/]+$/"
+				},
+				{
+					"command": "jungletvaf.makeFilePublic",
+					"group": "7_modification",
+					"when": "!explorerResourceIsFolder && resourceScheme == jungletvaf && resource not in jungletvaf.publicFiles"
+				},
+				{
+					"command": "jungletvaf.makeFileInternal",
+					"group": "7_modification",
+					"when": "!explorerResourceIsFolder && resourceScheme == jungletvaf && resource in jungletvaf.publicFiles"
+				},
+				{
+					"command": "jungletvaf.setFileMimeType",
+					"group": "7_modification",
+					"when": "!explorerResourceIsFolder && resourceScheme == jungletvaf"
+				}
+			],
+			"debug/toolBar": [
+				{
+					"command": "jungletvaf.debug.openConsoleInBrowser",
+					"when": "debugType == jungletvaf"
+				}
+			]
+		},
+		"taskDefinitions": [
+			{
+				"type": "JungleTV",
+				"required": [
+					"subtype"
+				],
+				"properties": {
+					"subtype": {
+						"type": "string",
+						"description": "The subtype of task"
+					},
+					"application": {
+						"type": "object",
+						"description": "The endpoint and ID of the application to launch"
+					},
+					"restart": {
+						"type": "boolean",
+						"description": "Whether to restart an application that is already running"
+					}
+				}
+			}
+		],
+		"debuggers": [
+			{
+				"type": "jungletvaf",
+				"label": "JungleTV Application Console",
+				"languages": [
+					"javascript"
+				],
+				"configurationAttributes": {
+					"launch": {
+						"required": [
+							"application"
+						],
+						"application": {
+							"type": "object",
+							"description": "The endpoint and ID of the application"
+						}
+					},
+					"attach": {
+						"required": [
+							"application"
+						],
+						"application": {
+							"type": "object",
+							"description": "The endpoint and ID of the application"
+						}
+					}
+				}
+			}
+		],
+		"viewsWelcome": [
+			{
+				"view": "explorer",
+				"contents": "You can also open a JungleTV application for editing.\n[Open JungleTV Application](command:jungletvaf.editApplication)",
+				"when": "jungletvaf.hasConfiguredEnvironments"
+			},
+			{
+				"view": "explorer",
+				"contents": "You could also open a JungleTV AF application for editing, if you had a JungleTV environment configured.\n[Configure JungleTV Environment](command:jungletvaf.configureNewEnvironment)",
+				"when": "!jungletvaf.hasConfiguredEnvironments"
+			}
+		]
+	},
+	"scripts": {
+		"package": "vsce package --no-dependencies",
+		"vscode:prepublish": "webpack --mode production --devtool hidden-source-map",
+		"webpack": "webpack --mode development",
+		"webpack-dev": "webpack --mode development --watch",
+		"test-compile": "tsc -p ./",
+		"lint": "eslint \"src/**/*.ts\""
+	},
+	"devDependencies": {
+		"@types/node": "^16.11.7",
+		"@types/vscode": "^1.73.0",
+		"@typescript-eslint/eslint-plugin": "^5.42.0",
+		"@typescript-eslint/parser": "^5.42.0",
+		"@vscode/debugadapter": "^1.59.0",
+		"@vscode/vsce": "^2.19.0",
+		"eslint": "^8.26.0",
+		"protoc-gen-js": "^3.21.2",
+		"ts-loader": "^7.0.5",
+		"typescript": "^5.0.2",
+		"url": "^0.11.0",
+		"webpack": "^5.75.0",
+		"webpack-cli": "^5.0.1"
+	},
+	"dependencies": {
+		"@improbable-eng/grpc-web": "^0.15.0",
+		"@types/google-protobuf": "^3.15.2",
+		"async-mutex": "^0.4.0",
+		"path-browserify": "^1.0.1"
+	}
+}
