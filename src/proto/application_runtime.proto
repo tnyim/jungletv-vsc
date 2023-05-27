@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option go_package = "github.com/tnyim/jungletv/proto";
+
+import "google/protobuf/timestamp.proto";
+
+package jungletv;
+
+message ResolveApplicationPageRequest {
+    string application_id = 1;
+    string page_id = 2;
+}
+
+message ResolveApplicationPageResponse {
+    string page_title = 1;
+    google.protobuf.Timestamp application_version = 2;
+}
+
+message ConsumeApplicationEventsRequest {
+    string application_id = 1;
+    string page_id = 2;
+}
+
+message ApplicationEventUpdate {
+    oneof type {
+        ApplicationHeartbeatEvent heartbeat = 1;
+        ApplicationServerEvent application_event = 2;
+    }
+}
+
+message ApplicationHeartbeatEvent {
+    uint32 sequence = 1;
+}
+
+message ApplicationServerEvent {
+    string name = 1;
+    repeated string arguments = 2;
+}
+
+message ApplicationServerMethodRequest {
+    string application_id = 1;
+    string page_id = 2;
+    string method = 3;
+    repeated string arguments = 4;
+}
+
+message ApplicationServerMethodResponse {
+    string result = 1;
+}
+
+message TriggerApplicationEventRequest {
+    string application_id = 1;
+    string page_id = 2;
+    string name = 3;
+    repeated string arguments = 4;
+}
+
+message TriggerApplicationEventResponse {}

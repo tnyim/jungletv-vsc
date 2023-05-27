@@ -1,0 +1,1454 @@
+syntax = "proto3";
+
+option go_package = "github.com/tnyim/jungletv/proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "common.proto";
+import "application_editor.proto";
+import "application_runtime.proto";
+
+package jungletv;
+
+service JungleTV {
+    rpc SignIn (SignInRequest) returns (stream SignInProgress) {}
+    rpc EnqueueMedia (EnqueueMediaRequest) returns (EnqueueMediaResponse) {}
+    rpc RemoveOwnQueueEntry (RemoveOwnQueueEntryRequest) returns (RemoveOwnQueueEntryResponse) {}
+    rpc MoveQueueEntry (MoveQueueEntryRequest) returns (MoveQueueEntryResponse) {}
+    rpc MonitorTicket (MonitorTicketRequest) returns (stream EnqueueMediaTicket) {}
+    rpc ConsumeMedia (ConsumeMediaRequest) returns (stream MediaConsumptionCheckpoint) {}
+    rpc MonitorQueue (MonitorQueueRequest) returns (stream Queue) {}
+    rpc MonitorSkipAndTip (MonitorSkipAndTipRequest) returns (stream SkipAndTipStatus) {}
+    rpc RewardInfo (RewardInfoRequest) returns (RewardInfoResponse) {}
+    rpc SubmitActivityChallenge (SubmitActivityChallengeRequest) returns (SubmitActivityChallengeResponse) {}
+    rpc ProduceSegchaChallenge (ProduceSegchaChallengeRequest) returns (ProduceSegchaChallengeResponse) {}
+    rpc ConsumeChat (ConsumeChatRequest) returns (stream ChatUpdate) {}
+    rpc SendChatMessage (SendChatMessageRequest) returns (SendChatMessageResponse) {}
+    rpc UserPermissionLevel (UserPermissionLevelRequest) returns (UserPermissionLevelResponse) {}
+    rpc GetDocument (GetDocumentRequest) returns (Document) {}
+    rpc SetChatNickname (SetChatNicknameRequest) returns (SetChatNicknameResponse) {}
+    rpc Withdraw (WithdrawRequest) returns (WithdrawResponse) {}
+    rpc Leaderboards (LeaderboardsRequest) returns (LeaderboardsResponse) {}
+    rpc RewardHistory (RewardHistoryRequest) returns (RewardHistoryResponse) {}
+    rpc WithdrawalHistory (WithdrawalHistoryRequest) returns (WithdrawalHistoryResponse) {}
+    rpc OngoingRaffleInfo (OngoingRaffleInfoRequest) returns (OngoingRaffleInfoResponse) {}
+    rpc RaffleDrawings (RaffleDrawingsRequest) returns (RaffleDrawingsResponse) {}
+    rpc Connections (ConnectionsRequest) returns (ConnectionsResponse) {}
+    rpc CreateConnection (CreateConnectionRequest) returns (CreateConnectionResponse) {}
+    rpc RemoveConnection (RemoveConnectionRequest) returns (RemoveConnectionResponse) {}
+    rpc UserProfile (UserProfileRequest) returns (UserProfileResponse) {}
+    rpc UserStats (UserStatsRequest) returns (UserStatsResponse) {}
+    rpc SetProfileBiography (SetProfileBiographyRequest) returns (SetProfileBiographyResponse) {}
+    rpc SetProfileFeaturedMedia (SetProfileFeaturedMediaRequest) returns (SetProfileFeaturedMediaResponse) {}
+    rpc PlayedMediaHistory (PlayedMediaHistoryRequest) returns (PlayedMediaHistoryResponse) {}
+    rpc BlockUser (BlockUserRequest) returns (BlockUserResponse) {}
+    rpc UnblockUser (UnblockUserRequest) returns (UnblockUserResponse) {}
+    rpc BlockedUsers (BlockedUsersRequest) returns (BlockedUsersResponse) {}
+    rpc PointsInfo (PointsInfoRequest) returns (PointsInfoResponse) {}
+    rpc PointsTransactions (PointsTransactionsRequest) returns (PointsTransactionsResponse) {}
+    rpc ChatGifSearch (ChatGifSearchRequest) returns (ChatGifSearchResponse) {}
+    rpc ConvertBananoToPoints (ConvertBananoToPointsRequest) returns (stream ConvertBananoToPointsStatus) {}
+    rpc StartOrExtendSubscription (StartOrExtendSubscriptionRequest) returns (StartOrExtendSubscriptionResponse) {}
+    rpc SoundCloudTrackDetails (SoundCloudTrackDetailsRequest) returns (SoundCloudTrackDetailsResponse) {}
+    rpc IncreaseOrReduceSkipThreshold (IncreaseOrReduceSkipThresholdRequest) returns (IncreaseOrReduceSkipThresholdResponse) {}
+    rpc CheckMediaEnqueuingPassword (CheckMediaEnqueuingPasswordRequest) returns (CheckMediaEnqueuingPasswordResponse) {}
+    rpc MonitorMediaEnqueuingPermission (MonitorMediaEnqueuingPermissionRequest) returns (stream MediaEnqueuingPermissionStatus) {}
+    rpc InvalidateAuthTokens (InvalidateAuthTokensRequest) returns (InvalidateAuthTokensResponse) {}
+    rpc AuthorizeApplication (AuthorizeApplicationRequest) returns (stream AuthorizeApplicationEvent) {}
+    rpc AuthorizationProcessData (AuthorizationProcessDataRequest) returns (AuthorizationProcessDataResponse) {}
+    rpc ConsentOrDissentToAuthorization (ConsentOrDissentToAuthorizationRequest) returns (ConsentOrDissentToAuthorizationResponse) {}
+
+    // moderation endpoints
+    rpc ForciblyEnqueueTicket(ForciblyEnqueueTicketRequest) returns (ForciblyEnqueueTicketResponse) {}
+    rpc RemoveQueueEntry(RemoveQueueEntryRequest) returns (RemoveQueueEntryResponse) {}
+    rpc RemoveChatMessage(RemoveChatMessageRequest) returns (RemoveChatMessageResponse) {}
+    rpc SetChatSettings(SetChatSettingsRequest) returns (SetChatSettingsResponse) {}
+    rpc SetMediaEnqueuingEnabled(SetMediaEnqueuingEnabledRequest) returns (SetMediaEnqueuingEnabledResponse) {}
+    rpc UserBans(UserBansRequest) returns (UserBansResponse) {}
+    rpc BanUser(BanUserRequest) returns (BanUserResponse) {}
+    rpc RemoveBan(RemoveBanRequest) returns (RemoveBanResponse) {}
+    rpc UserVerifications(UserVerificationsRequest) returns (UserVerificationsResponse) {}
+    rpc VerifyUser(VerifyUserRequest) returns (VerifyUserResponse) {}
+    rpc RemoveUserVerification(RemoveUserVerificationRequest) returns (RemoveUserVerificationResponse) {}
+    rpc UserChatMessages(UserChatMessagesRequest) returns (UserChatMessagesResponse) {}
+    rpc DisallowedMedia(DisallowedMediaRequest) returns (DisallowedMediaResponse) {}
+    rpc AddDisallowedMedia(AddDisallowedMediaRequest) returns (AddDisallowedMediaResponse) {}
+    rpc RemoveDisallowedMedia(RemoveDisallowedMediaRequest) returns (RemoveDisallowedMediaResponse) {}
+    rpc DisallowedMediaCollections(DisallowedMediaCollectionsRequest) returns (DisallowedMediaCollectionsResponse) {}
+    rpc AddDisallowedMediaCollection(AddDisallowedMediaCollectionRequest) returns (AddDisallowedMediaCollectionResponse) {}
+    rpc RemoveDisallowedMediaCollection(RemoveDisallowedMediaCollectionRequest) returns (RemoveDisallowedMediaCollectionResponse) {}
+    rpc UpdateDocument(Document) returns (UpdateDocumentResponse) {}
+    rpc Documents(DocumentsRequest) returns (DocumentsResponse) {}
+    rpc SetUserChatNickname(SetUserChatNicknameRequest) returns (SetUserChatNicknameResponse) {}
+    rpc SetPricesMultiplier(SetPricesMultiplierRequest) returns (SetPricesMultiplierResponse) {}
+    rpc SetMinimumPricesMultiplier(SetMinimumPricesMultiplierRequest) returns (SetMinimumPricesMultiplierResponse) {}
+    rpc SetCrowdfundedSkippingEnabled(SetCrowdfundedSkippingEnabledRequest) returns (SetCrowdfundedSkippingEnabledResponse) {}
+    rpc SetSkipPriceMultiplier(SetSkipPriceMultiplierRequest) returns (SetSkipPriceMultiplierResponse) {}
+    rpc ConfirmRaffleWinner(ConfirmRaffleWinnerRequest) returns (ConfirmRaffleWinnerResponse) {}
+    rpc CompleteRaffle(CompleteRaffleRequest) returns (CompleteRaffleResponse) {}
+    rpc RedrawRaffle(RedrawRaffleRequest) returns (RedrawRaffleResponse) {}
+    rpc TriggerAnnouncementsNotification(TriggerAnnouncementsNotificationRequest) returns (TriggerAnnouncementsNotificationResponse) {}
+    rpc SpectatorInfo(SpectatorInfoRequest) returns (Spectator) {}
+    rpc ResetSpectatorStatus(ResetSpectatorStatusRequest) returns (ResetSpectatorStatusResponse) {}
+    rpc MonitorModerationStatus(MonitorModerationStatusRequest) returns (stream ModerationStatusOverview) {}
+    rpc SetOwnQueueEntryRemovalAllowed(SetOwnQueueEntryRemovalAllowedRequest) returns (SetOwnQueueEntryRemovalAllowedResponse) {}
+    rpc SetQueueEntryReorderingAllowed(SetQueueEntryReorderingAllowedRequest) returns (SetQueueEntryReorderingAllowedResponse) {}
+    rpc SetNewQueueEntriesAlwaysUnskippable(SetNewQueueEntriesAlwaysUnskippableRequest) returns (SetNewQueueEntriesAlwaysUnskippableResponse) {}
+    rpc SetSkippingEnabled(SetSkippingEnabledRequest) returns (SetSkippingEnabledResponse) {}
+    rpc SetQueueInsertCursor(SetQueueInsertCursorRequest) returns (SetQueueInsertCursorResponse) {}
+    rpc ClearQueueInsertCursor(ClearQueueInsertCursorRequest) returns (ClearQueueInsertCursorResponse) {}
+    rpc ClearUserProfile(ClearUserProfileRequest) returns (ClearUserProfileResponse) {}
+    rpc MarkAsActivelyModerating(MarkAsActivelyModeratingRequest) returns (MarkAsActivelyModeratingResponse) {}
+    rpc StopActivelyModerating(StopActivelyModeratingRequest) returns (StopActivelyModeratingResponse) {}
+    rpc AdjustPointsBalance(AdjustPointsBalanceRequest) returns (AdjustPointsBalanceResponse) {}
+    rpc AddVipUser(AddVipUserRequest) returns (AddVipUserResponse) {}
+    rpc RemoveVipUser(RemoveVipUserRequest) returns (RemoveVipUserResponse) {}
+    rpc TriggerClientReload(TriggerClientReloadRequest) returns (TriggerClientReloadResponse) {}
+    rpc SetMulticurrencyPaymentsEnabled(SetMulticurrencyPaymentsEnabledRequest) returns (SetMulticurrencyPaymentsEnabledResponse) {}
+    rpc InvalidateUserAuthTokens(InvalidateUserAuthTokensRequest) returns (InvalidateUserAuthTokensResponse) {}
+
+    // application editor endpoints
+    rpc Applications(ApplicationsRequest) returns (ApplicationsResponse) {}
+    rpc GetApplication(GetApplicationRequest) returns (Application) {}
+    rpc UpdateApplication(Application) returns (UpdateApplicationResponse) {}
+    rpc CloneApplication(CloneApplicationRequest) returns (CloneApplicationResponse) {}
+    rpc DeleteApplication(DeleteApplicationRequest) returns (DeleteApplicationResponse) {}
+    rpc ApplicationFiles(ApplicationFilesRequest) returns (ApplicationFilesResponse) {}
+    rpc GetApplicationFile(GetApplicationFileRequest) returns (ApplicationFile) {}
+    rpc UpdateApplicationFile(ApplicationFile) returns (UpdateApplicationFileResponse) {}
+    rpc CloneApplicationFile(CloneApplicationFileRequest) returns (CloneApplicationFileResponse) {}
+    rpc DeleteApplicationFile(DeleteApplicationFileRequest) returns (DeleteApplicationFileResponse) {}
+    rpc LaunchApplication(LaunchApplicationRequest) returns (LaunchApplicationResponse) {}
+    rpc StopApplication(StopApplicationRequest) returns (StopApplicationResponse) {}
+    rpc ApplicationLog(ApplicationLogRequest) returns (ApplicationLogResponse) {}
+    rpc ConsumeApplicationLog(ConsumeApplicationLogRequest) returns (stream ApplicationLogEntryContainer) {}
+    rpc MonitorRunningApplications(MonitorRunningApplicationsRequest) returns (stream RunningApplications) {}
+    rpc EvaluateExpressionOnApplication(EvaluateExpressionOnApplicationRequest) returns (EvaluateExpressionOnApplicationResponse) {}
+    rpc ExportApplication(ExportApplicationRequest) returns (ExportApplicationResponse) {}
+    rpc ImportApplication(ImportApplicationRequest) returns (ImportApplicationResponse) {}
+
+    // application runtime endpoints
+    rpc ResolveApplicationPage(ResolveApplicationPageRequest) returns (ResolveApplicationPageResponse) {}
+    rpc ConsumeApplicationEvents(ConsumeApplicationEventsRequest) returns (stream ApplicationEventUpdate) {}
+    rpc ApplicationServerMethod(ApplicationServerMethodRequest) returns (ApplicationServerMethodResponse) {}
+    rpc TriggerApplicationEvent(TriggerApplicationEventRequest) returns (TriggerApplicationEventResponse) {}
+}
+
+message SignInRequest {
+    string rewards_address = 1;
+}
+
+message SignInProgress {
+    oneof step {
+        SignInVerification verification = 1;
+        SignInResponse response = 2;
+        SignInVerificationExpired expired = 3;
+        SignInAccountUnopened account_unopened = 4;
+    }
+}
+
+message SignInVerification {
+    string verification_representative_address = 1;
+    google.protobuf.Timestamp expiration = 2;
+}
+
+message SignInAccountUnopened {}
+
+message SignInResponse {
+    string auth_token = 1;
+    google.protobuf.Timestamp token_expiration = 2;
+}
+
+message SignInVerificationExpired {}
+
+message EnqueueYouTubeVideoData {
+    string id = 1;
+    optional google.protobuf.Duration start_offset = 2;
+    optional google.protobuf.Duration end_offset = 3;
+}
+
+message EnqueueSoundCloudTrackData {
+    string permalink = 1;
+    optional google.protobuf.Duration start_offset = 2;
+    optional google.protobuf.Duration end_offset = 3;
+}
+
+message EnqueueDocumentData {
+    string document_id = 1;
+    optional google.protobuf.Duration duration = 2;
+    string title = 3;
+    optional ForcedTicketEnqueueType enqueue_type = 4;
+}
+
+// EnqueueStubData allows us to prepare and confirm that polymorphism is working properly
+message EnqueueStubData {}
+
+message EnqueueMediaRequest {
+    bool unskippable = 1;
+    bool concealed = 2;
+    bool anonymous = 3;
+    optional string password = 4;
+    oneof media_info {
+        EnqueueStubData stub_data = 5;
+        EnqueueYouTubeVideoData youtube_video_data = 6;
+        EnqueueSoundCloudTrackData soundcloud_track_data = 7;
+        EnqueueDocumentData document_data = 8;
+    }
+}
+
+message EnqueueMediaResponse {
+    oneof enqueue_response {
+        EnqueueMediaTicket ticket = 1;
+        EnqueueMediaFailure failure = 2;
+    }
+}
+
+message EnqueueMediaFailure {
+    string failure_reason = 1;
+}
+
+enum EnqueueMediaTicketStatus {
+    ACTIVE = 0;
+    PAID = 1;
+    EXPIRED = 2;
+    FAILED_INSUFFICIENT_POINTS = 3;
+}
+
+message EnqueueMediaTicket {
+    string id = 1;
+    EnqueueMediaTicketStatus status = 2;
+    string payment_address = 3;
+    string enqueue_price = 4;
+    string play_next_price = 5;
+    string play_now_price = 6;
+    google.protobuf.Timestamp expiration = 7;
+    bool unskippable = 8;
+    bool concealed = 9;
+    bool currently_playing_is_unskippable = 10;
+    google.protobuf.Duration media_length = 11;
+    repeated ExtraCurrencyPaymentData extra_currency_payment_data = 12;
+    oneof media_info {
+        QueueYouTubeVideoData youtube_video_data = 13;
+        QueueSoundCloudTrackData soundcloud_track_data = 14;
+        QueueDocumentData document_data = 15;
+    }
+}
+
+message ExtraCurrencyPaymentData {
+    string currency_ticker = 1;
+    string swap_order_id = 2;
+    string payment_address = 3;
+    string enqueue_price = 4;
+    string play_next_price = 5;
+    string play_now_price = 6;
+}
+
+message MonitorTicketRequest {
+    string ticket_id = 1;
+}
+
+message RemoveOwnQueueEntryRequest {
+    string id = 1;
+}
+
+message RemoveOwnQueueEntryResponse {}
+
+enum QueueEntryMovementDirection {
+    QUEUE_ENTRY_MOVEMENT_DIRECTION_UNKNOWN = 0;
+    QUEUE_ENTRY_MOVEMENT_DIRECTION_DOWN = 1;
+    QUEUE_ENTRY_MOVEMENT_DIRECTION_UP = 2;
+}
+
+message MoveQueueEntryRequest {
+    string id = 1;
+    QueueEntryMovementDirection direction = 2;
+}
+
+message MoveQueueEntryResponse {}
+
+message ConsumeMediaRequest {}
+
+// NowPlayingStubData allows us to prepare and confirm that polymorphism is working properly
+message NowPlayingStubData {}
+
+message NowPlayingYouTubeVideoData {
+    string id = 1;
+}
+
+message NowPlayingSoundCloudTrackData {
+    string id = 1;
+}
+
+message NowPlayingDocumentData {
+    string id = 1;
+    google.protobuf.Timestamp updated_at = 2;
+    optional Document document = 3;
+}
+
+message MediaConsumptionCheckpoint {
+    bool media_present = 1;
+    google.protobuf.Duration current_position = 2;
+    bool live_broadcast = 3;
+    User requested_by = 4;
+    string request_cost = 5;
+    uint32 currently_watching = 6;
+    optional string reward = 7;
+    optional string reward_balance = 8;
+    optional ActivityChallenge activity_challenge = 9;
+    oneof media_info {
+        NowPlayingStubData stub_data = 10;
+        NowPlayingYouTubeVideoData youtube_video_data = 11;
+        NowPlayingSoundCloudTrackData soundcloud_track_data = 12;
+        NowPlayingDocumentData document_data = 13;
+    }
+    optional uint32 latest_announcement = 14;
+    optional bool has_chat_mention = 15;
+    optional string media_title = 16;
+    repeated ConfigurationChange configuration_changes = 17;
+}
+
+message ActivityChallenge {
+    string id = 1;
+    repeated string types = 2;
+    google.protobuf.Timestamp challenged_at = 3;
+}
+
+message ConfigurationChange {
+    oneof configuration_change {
+        string application_name = 1;
+        string logo_url = 2;
+        string favicon_url = 3;
+        ConfigurationChangeSidebarTabOpen open_sidebar_tab = 4;
+        string close_sidebar_tab = 5;
+    }
+}
+
+message ConfigurationChangeSidebarTabOpen {
+    string tab_id = 1;
+    string application_id = 2;
+    string page_id = 3;
+    string tab_title = 4;
+    string before_tab_id = 5;
+}
+
+message MonitorQueueRequest {}
+
+message Queue {
+    repeated QueueEntry entries = 1;
+    bool is_heartbeat = 2;
+    bool own_entry_removal_enabled = 3;
+    optional string insert_cursor = 4;
+    optional google.protobuf.Timestamp playing_since = 5;
+}
+
+message QueueYouTubeVideoData {
+    string id = 1;
+    string title = 2;
+    string thumbnail_url = 3;
+    string channel_title = 4;
+    bool live_broadcast = 5;
+}
+
+message QueueSoundCloudTrackData {
+    string id = 1;
+    string title = 2;
+    string thumbnail_url = 3;
+    string uploader = 4;
+    string artist = 5;
+    string permalink = 6;
+}
+
+message QueueDocumentData {
+    string id = 1;
+    string title = 2;
+}
+
+message QueueConcealedData {}
+
+message QueueEntry {
+    string id = 1;
+    User requested_by = 2;
+    string request_cost = 3;
+    google.protobuf.Timestamp requested_at = 4;
+    google.protobuf.Duration length = 5;
+    google.protobuf.Duration offset = 6;
+    bool unskippable = 7;
+    bool concealed = 8;
+    bool can_move_up = 9;
+    bool can_move_down = 10;
+    oneof media_info {
+        QueueYouTubeVideoData youtube_video_data = 11;
+        QueueSoundCloudTrackData soundcloud_track_data = 12;
+        QueueDocumentData document_data = 13;
+        QueueConcealedData concealed_data = 14;
+    }
+}
+
+message MonitorSkipAndTipRequest {}
+
+enum SkipStatus {
+    SKIP_STATUS_ALLOWED = 0;
+    SKIP_STATUS_UNSKIPPABLE = 1;
+    SKIP_STATUS_END_OF_MEDIA_PERIOD = 2;
+    SKIP_STATUS_NO_MEDIA = 3;
+    SKIP_STATUS_UNAVAILABLE = 4;
+    SKIP_STATUS_DISABLED = 5;
+    SKIP_STATUS_START_OF_MEDIA_PERIOD = 6;
+}
+
+message SkipAndTipStatus {
+    SkipStatus skip_status = 1;
+    string skip_address = 2;
+    string skip_balance = 3;
+    string skip_threshold = 4;
+    bool skip_threshold_reducible = 5;
+    string rain_address = 6;
+    string rain_balance = 7;
+}
+
+message RewardInfoRequest {}
+
+message RewardInfoResponse {
+    string rewards_address = 1;
+    string reward_balance = 2;
+    bool withdrawal_pending = 3;
+    bool bad_representative = 4;
+    optional int32 withdrawal_position_in_queue = 5;
+    optional int32 withdrawals_in_queue = 6;
+}
+
+message RemoveQueueEntryRequest {
+    string id = 1;
+}
+
+message RemoveQueueEntryResponse {}
+
+enum ForcedTicketEnqueueType {
+    ENQUEUE = 0;
+    PLAY_NEXT = 1;
+    PLAY_NOW = 2;
+}
+
+message ForciblyEnqueueTicketRequest {
+    string id = 1;
+    ForcedTicketEnqueueType enqueue_type = 2;
+}
+
+message ForciblyEnqueueTicketResponse {}
+
+message SubmitActivityChallengeRequest {
+    string challenge = 1;
+    repeated string responses = 2;
+    bool trusted = 3;
+    string client_version = 4;
+}
+
+message SubmitActivityChallengeResponse {
+    bool skipped_client_integrity_checks = 1;
+}
+
+message ConsumeChatRequest {
+    uint32 initial_history_size = 1;
+}
+
+message ChatUpdate {
+    repeated ChatUpdateEvent events = 1;
+}
+
+message ChatUpdateEvent {
+    oneof event {
+        ChatDisabledEvent disabled = 1;
+        ChatEnabledEvent enabled = 2;
+        ChatMessageCreatedEvent message_created = 3;
+        ChatMessageDeletedEvent message_deleted = 4;
+        ChatHeartbeatEvent heartbeat = 5;
+        ChatBlockedUserCreatedEvent blocked_user_created = 6;
+        ChatBlockedUserDeletedEvent blocked_user_deleted = 7;
+        ChatEmoteCreatedEvent emote_created = 8;
+    }
+}
+
+message ChatMessage {
+    int64 id = 1 [jstype = JS_STRING];
+    google.protobuf.Timestamp created_at = 2;
+    oneof message {
+        UserChatMessage user_message = 3;
+        SystemChatMessage system_message = 4;
+    }
+    optional ChatMessage reference = 5;
+    repeated ChatMessageAttachment attachments = 6;
+}
+
+message ChatMessageAttachment {
+    oneof attachment {
+        ChatMessageTenorGifAttachment tenor_gif = 1;
+        ChatMessageApplicationPageAttachment application_page = 2;
+    }
+}
+
+message ChatMessageTenorGifAttachment {
+    string id = 1;
+    string video_url = 2;
+    string video_fallback_url = 3;
+    string title = 4;
+    int32 width = 5;
+    int32 height = 6;
+}
+
+message ChatMessageApplicationPageAttachment {
+    string application_id = 1;
+    string page_id = 2;
+    int32 height = 3;
+    ResolveApplicationPageResponse page_info = 4;
+}
+
+message UserChatMessage {
+    User author = 1;
+    string content = 2;
+}
+
+message SystemChatMessage {
+    string content = 1;
+}
+
+enum ChatDisabledReason {
+    UNSPECIFIED = 0;
+    MODERATOR_NOT_PRESENT = 1;
+}
+
+message ChatDisabledEvent {
+    ChatDisabledReason reason = 1;
+}
+
+message ChatEnabledEvent {}
+
+message ChatMessageCreatedEvent {
+    ChatMessage message = 1;
+}
+
+message ChatMessageDeletedEvent {
+    int64 id = 1 [jstype = JS_STRING];
+}
+
+message ChatHeartbeatEvent {
+    uint32 sequence = 1;
+}
+
+message ChatBlockedUserCreatedEvent {
+    string blocked_user_address = 1;
+}
+
+message ChatBlockedUserDeletedEvent {
+    string blocked_user_address = 1;
+}
+
+message ChatEmoteCreatedEvent {
+    int64 id = 1 [jstype = JS_STRING];
+    string shortcode = 2;
+    bool animated = 3;
+    bool requires_subscription = 4;
+}
+
+message SendChatMessageRequest {
+    string content = 1;
+    bool trusted = 2;
+    optional int64 reply_reference_id = 3 [jstype = JS_STRING];
+    optional string tenor_gif_attachment = 4;
+}
+
+message SendChatMessageResponse {
+    int64 id = 1;
+}
+
+message RemoveChatMessageRequest {
+    int64 id = 1 [jstype = JS_STRING];
+}
+
+message RemoveChatMessageResponse {}
+
+message SetChatSettingsRequest {
+    bool enabled = 1;
+    bool slowmode = 2;
+}
+
+message SetChatSettingsResponse {}
+
+message BanUserRequest {
+    string address = 1;
+    string remote_address = 2;
+    bool chat_banned = 3;
+    bool enqueuing_banned = 4;
+    bool rewards_banned = 5;
+    string reason = 6;
+    optional google.protobuf.Duration duration = 7;
+}
+
+message BanUserResponse {
+    repeated string ban_ids = 1;
+}
+
+message RemoveBanRequest {
+    string ban_id = 1;
+    string reason = 2;
+}
+
+message RemoveBanResponse {}
+
+message UserBan {
+    string ban_id = 1;
+    google.protobuf.Timestamp banned_at = 2;
+    optional google.protobuf.Timestamp banned_until = 3;
+    string address = 4;
+    string remote_address = 5;
+    bool chat_banned = 6;
+    bool enqueuing_banned = 7;
+    bool rewards_banned = 8;
+    string reason = 9;
+    optional string unban_reason = 10;
+    User banned_by = 11;
+}
+
+message UserBansRequest {
+    PaginationParameters pagination_params = 1;
+    string search_query = 2;
+    bool active_only = 3;
+}
+
+message UserBansResponse {
+    repeated UserBan user_bans = 1;
+    uint64 offset = 2;
+    uint64 total = 3;
+}
+
+message VerifyUserRequest {
+    string address = 1;
+    bool skip_client_integrity_checks = 2;
+    bool skip_ip_address_reputation_checks = 3;
+    bool reduce_hard_challenge_frequency = 4;
+    string reason = 5;
+}
+
+message VerifyUserResponse {
+    string verification_id = 1;
+}
+
+message RemoveUserVerificationRequest {
+    string verification_id = 1;
+    string reason = 2;
+}
+
+message RemoveUserVerificationResponse {}
+
+message UserVerification {
+    string id = 1;
+    google.protobuf.Timestamp created_at = 2;
+    string address = 3;
+    bool skip_client_integrity_checks = 4;
+    bool skip_ip_address_reputation_checks = 5;
+    bool reduce_hard_challenge_frequency = 6;
+    string reason = 7;
+    User verified_by = 8;
+}
+
+message UserVerificationsRequest {
+    PaginationParameters pagination_params = 1;
+    string search_query = 2;
+}
+
+message UserVerificationsResponse {
+    repeated UserVerification user_verifications = 1;
+    uint64 offset = 2;
+    uint64 total = 3;
+}
+
+enum AllowedMediaEnqueuingType {
+    DISABLED = 0;
+    STAFF_ONLY = 1;
+    ENABLED = 2;
+    PASSWORD_REQUIRED = 3;
+}
+
+message SetMediaEnqueuingEnabledRequest {
+    AllowedMediaEnqueuingType allowed = 1;
+    optional string enqueuing_password = 2;
+}
+
+message SetMediaEnqueuingEnabledResponse {}
+
+message UserChatMessagesRequest {
+    string address = 1;
+    uint32 num_messages = 2;
+}
+
+message UserChatMessagesResponse {
+    repeated ChatMessage messages = 1;
+}
+
+message UserPermissionLevelRequest {}
+
+enum PermissionLevel {
+    UNAUTHENTICATED = 0;
+    USER = 1;
+    APPEDITOR = 2;
+    ADMIN = 3;
+}
+
+message UserPermissionLevelResponse {
+    PermissionLevel permission_level = 1;
+}
+
+message DisallowedMediaRequest {
+    PaginationParameters pagination_params = 1;
+    string search_query = 2;
+}
+
+enum DisallowedMediaType {
+    UNKNOWN_DISALLOWED_MEDIA_TYPE = 0;
+    DISALLOWED_MEDIA_TYPE_YOUTUBE_VIDEO = 1;
+    DISALLOWED_MEDIA_TYPE_SOUNDCLOUD_TRACK = 2;
+}
+
+message DisallowedMedia {
+    string id = 1;
+    User disallowed_by = 2;
+    google.protobuf.Timestamp disallowed_at = 3;
+    DisallowedMediaType media_type = 4;
+    string media_id = 5;
+    string media_title = 6;
+}
+
+message DisallowedMediaResponse {
+    repeated DisallowedMedia disallowed_media = 1;
+    uint64 offset = 2;
+    uint64 total = 3;
+}
+
+message AddDisallowedMediaRequest {
+    // Do this so we can repurpose the same types and part of the code
+    EnqueueMediaRequest disallowed_media_request = 1;
+}
+
+message AddDisallowedMediaResponse {
+    string id = 1;
+}
+
+message RemoveDisallowedMediaRequest {
+    string id = 1;
+}
+
+message RemoveDisallowedMediaResponse {}
+
+message DisallowedMediaCollectionsRequest {
+    PaginationParameters pagination_params = 1;
+    string search_query = 2;
+}
+
+enum DisallowedMediaCollectionType {
+    UNKNOWN_DISALLOWED_MEDIA_COLLECTION_TYPE = 0;
+    DISALLOWED_MEDIA_COLLECTION_TYPE_YOUTUBE_CHANNEL = 1;
+    DISALLOWED_MEDIA_COLLECTION_TYPE_SOUNDCLOUD_USER = 2;
+}
+
+message DisallowedMediaCollection {
+    string id = 1;
+    User disallowed_by = 2;
+    google.protobuf.Timestamp disallowed_at = 3;
+    DisallowedMediaCollectionType collection_type = 4;
+    string collection_id = 5;
+    string collection_title = 6;
+}
+
+message DisallowedMediaCollectionsResponse {
+    repeated DisallowedMediaCollection disallowed_media_collections = 1;
+    uint64 offset = 2;
+    uint64 total = 3;
+}
+
+message AddDisallowedMediaCollectionRequest {
+    // Do this so we can repurpose the same types and part of the code
+    EnqueueMediaRequest disallowed_media_request = 1;
+}
+
+message AddDisallowedMediaCollectionResponse {
+    repeated string ids = 1;
+}
+
+message RemoveDisallowedMediaCollectionRequest {
+    string id = 1;
+}
+
+message RemoveDisallowedMediaCollectionResponse {}
+
+message GetDocumentRequest {
+    string id = 1;
+}
+
+message Document {
+    string id = 1;
+    string format = 2;
+    string content = 3;
+    google.protobuf.Timestamp updated_at = 4;
+}
+
+message UpdateDocumentResponse {}
+
+message DocumentsRequest {
+    PaginationParameters pagination_params = 1;
+    string search_query = 2;
+}
+
+message DocumentHeader {
+    string id = 1;
+    string format = 2;
+    google.protobuf.Timestamp updated_at = 3;
+    User updated_by = 4;
+    bool public = 5;
+}
+
+message DocumentsResponse {
+    repeated DocumentHeader documents = 1;
+    uint64 offset = 2;
+    uint64 total = 3;
+}
+
+message SetChatNicknameRequest {
+    string nickname = 1;
+}
+
+message SetChatNicknameResponse {}
+
+message SetUserChatNicknameRequest {
+    string address = 1;
+    string nickname = 2;
+}
+
+message SetUserChatNicknameResponse {}
+
+message SetPricesMultiplierRequest {
+    int32 multiplier = 1;
+}
+
+message SetPricesMultiplierResponse {}
+
+message SetMinimumPricesMultiplierRequest {
+    int32 multiplier = 1;
+}
+
+message SetMinimumPricesMultiplierResponse {}
+
+message WithdrawRequest {}
+
+message WithdrawResponse {}
+
+enum LeaderboardPeriod {
+    UNKNOWN_LEADERBOARD_PERIOD = 0;
+    LAST_24_HOURS = 1;
+    LAST_7_DAYS = 2;
+    LAST_30_DAYS = 3;
+}
+
+message LeaderboardsRequest {
+    LeaderboardPeriod period = 1;
+}
+
+message LeaderboardsResponse {
+    repeated Leaderboard leaderboards = 1;
+}
+
+message Leaderboard {
+    string title = 1;
+    repeated string value_titles = 2;
+    repeated LeaderboardRow rows = 3;
+}
+
+message LeaderboardRow {
+    uint32 row_num = 1;
+    uint32 position = 2;
+    string address = 3;
+    optional string nickname = 4;
+    repeated LeaderboardValue values = 5;
+}
+
+message LeaderboardValue {
+    oneof value {
+        string amount = 1;
+    }
+}
+
+message RewardHistoryRequest {
+    PaginationParameters pagination_params = 1;
+}
+
+message ReceivedReward {
+    string id = 1;
+    string rewards_address = 2;
+    string amount = 3;
+    google.protobuf.Timestamp received_at = 4;
+    string media_id = 5;
+    oneof media_info {
+        QueueYouTubeVideoData youtube_video_data = 6;
+        QueueSoundCloudTrackData soundcloud_track_data = 7;
+        QueueDocumentData document_data = 8;
+    }
+}
+
+message RewardHistoryResponse {
+    repeated ReceivedReward received_rewards = 1;
+    uint64 offset = 2;
+    uint64 total = 3;
+}
+
+message WithdrawalHistoryRequest {
+    PaginationParameters pagination_params = 1;
+}
+
+message Withdrawal {
+    string tx_hash = 1;
+    string rewards_address = 2;
+    string amount = 3;
+    google.protobuf.Timestamp started_at = 4;
+    google.protobuf.Timestamp completed_at = 5;
+}
+
+message WithdrawalHistoryResponse {
+    repeated Withdrawal withdrawals = 1;
+    uint64 offset = 2;
+    uint64 total = 3;
+}
+
+message SetCrowdfundedSkippingEnabledRequest {
+    bool enabled = 1;
+}
+
+message SetCrowdfundedSkippingEnabledResponse {}
+
+message SetSkipPriceMultiplierRequest {
+    int32 multiplier = 1;
+}
+
+message SetSkipPriceMultiplierResponse {}
+
+message ProduceSegchaChallengeRequest {}
+
+message ProduceSegchaChallengeResponse {
+    string challenge_id = 1;
+    repeated SegchaChallengeStep steps = 2;
+}
+
+message SegchaChallengeStep {
+    bytes image = 1;
+}
+
+message ConfirmRaffleWinnerRequest {
+    string raffle_id = 1;
+}
+
+message ConfirmRaffleWinnerResponse {}
+
+message CompleteRaffleRequest {
+    string raffle_id = 1;
+    string prize_tx_hash = 2;
+}
+
+message CompleteRaffleResponse {}
+
+message RedrawRaffleRequest {
+    string raffle_id = 1;
+    string reason = 2;
+}
+
+message RedrawRaffleResponse {}
+
+message OngoingRaffleInfoRequest {}
+
+message OngoingRaffleInfoResponse {
+    optional OngoingRaffleInfo raffle_info = 1;
+}
+
+message OngoingRaffleInfo {
+    string raffle_id = 1;
+    string entries_url = 2;
+    string info_url = 3;
+    google.protobuf.Timestamp period_start = 4;
+    google.protobuf.Timestamp period_end = 5;
+    uint32 total_tickets = 6;
+    optional uint32 user_tickets = 7;
+}
+
+enum RaffleDrawingStatus {
+    UNKNOWN_RAFFLE_DRAWING_STATUS = 0;
+    RAFFLE_DRAWING_STATUS_ONGOING = 1;
+    RAFFLE_DRAWING_STATUS_PENDING = 2;
+    RAFFLE_DRAWING_STATUS_CONFIRMED = 3;
+    RAFFLE_DRAWING_STATUS_VOIDED = 4;
+    RAFFLE_DRAWING_STATUS_COMPLETE = 5;
+}
+
+message RaffleDrawing {
+    string raffle_id = 1;
+    uint32 drawing_number = 2;
+    google.protobuf.Timestamp period_start = 3;
+    google.protobuf.Timestamp period_end = 4;
+    RaffleDrawingStatus status = 5;
+    string reason = 6;
+    optional uint32 winning_ticket_number = 7;
+    optional User winner = 8;
+    optional string prize_tx_hash = 9;
+    string entries_url = 10;
+    string info_url = 11;
+}
+
+message RaffleDrawingsRequest {
+    PaginationParameters pagination_params = 1;
+}
+
+message RaffleDrawingsResponse {
+    repeated RaffleDrawing raffle_drawings = 1;
+    uint64 offset = 2;
+    uint64 total = 3;
+}
+
+message TriggerAnnouncementsNotificationRequest {}
+
+message TriggerAnnouncementsNotificationResponse {}
+
+message SpectatorInfoRequest {
+    string rewards_address = 1;
+}
+
+message Spectator {
+    string rewards_address = 1;
+    uint32 num_connections = 2;
+    uint32 num_spectators_with_same_remote_address = 3;
+    google.protobuf.Timestamp watching_since = 4;
+    bool remote_address_has_good_reputation = 5;
+    bool remote_address_banned_from_rewards = 6;
+    bool legitimate = 7;
+    optional google.protobuf.Timestamp not_legitimate_since = 8;
+    optional google.protobuf.Timestamp stopped_watching_at = 9;
+    optional ActivityChallenge activity_challenge = 10;
+    bool client_integrity_checks_skipped = 11;
+    bool ip_address_reputation_checks_skipped = 12;
+    bool hard_challenge_frequency_reduced = 13;
+}
+
+message ResetSpectatorStatusRequest {
+    string rewards_address = 1;
+}
+
+message ResetSpectatorStatusResponse {}
+
+message MonitorModerationStatusRequest {}
+
+message ModerationStatusOverview {
+    AllowedMediaEnqueuingType allowed_media_enqueuing = 1;
+    int32 enqueuing_prices_multiplier = 2;
+    bool crowdfunded_skipping_enabled = 3;
+    int32 crowdfunded_skipping_prices_multiplier = 4;
+    bool new_entries_always_unskippable = 5;
+    bool own_entry_removal_enabled = 6;
+    bool all_skipping_enabled = 7;
+    optional string queue_insert_cursor = 8;
+    int32 minimum_prices_multiplier = 9;
+    repeated User actively_moderating = 10;
+    bool allow_entry_reordering = 11;
+    repeated User vip_users = 12;
+}
+
+message SetQueueEntryReorderingAllowedRequest {
+    bool allowed = 1;
+}
+
+message SetQueueEntryReorderingAllowedResponse {}
+
+message SetOwnQueueEntryRemovalAllowedRequest {
+    bool allowed = 1;
+}
+
+message SetOwnQueueEntryRemovalAllowedResponse {}
+
+message SetNewQueueEntriesAlwaysUnskippableRequest {
+    bool enabled = 1;
+}
+
+message SetNewQueueEntriesAlwaysUnskippableResponse {}
+
+message SetSkippingEnabledRequest {
+    bool enabled = 1;
+}
+
+message SetSkippingEnabledResponse {}
+
+message ConnectionsRequest {}
+
+enum ConnectionService {
+    UNKNOWN_CONNECTION_SERVICE = 0;
+    CRYPTOMONKEYS = 1;
+}
+
+message Connection {
+    string id = 1;
+    ConnectionService service = 2;
+    string name = 3;
+    google.protobuf.Timestamp created_at = 4;
+}
+
+message ServiceInfo {
+    ConnectionService service = 1;
+    optional int32 max_connections = 2;
+}
+
+message ConnectionsResponse {
+    repeated Connection connections = 1;
+    repeated ServiceInfo service_infos = 2;
+}
+
+message CreateConnectionRequest {
+    ConnectionService service = 1;
+}
+
+message CreateConnectionResponse {
+    string auth_url = 1;
+}
+
+message RemoveConnectionRequest {
+    string id = 1;
+}
+
+message RemoveConnectionResponse {}
+
+message SetQueueInsertCursorRequest {
+    string id = 1;
+}
+
+message SetQueueInsertCursorResponse {}
+
+message ClearQueueInsertCursorRequest {}
+
+message ClearQueueInsertCursorResponse {}
+
+message UserProfileRequest {
+    string address = 1;
+}
+
+message UserProfileResponse {
+    User user = 1;
+    repeated PlayedMedia recently_played_requests = 2;
+    string biography = 3;
+    optional SubscriptionDetails current_subscription = 4;
+    oneof featured_media {
+        QueueYouTubeVideoData youtube_video_data = 5;
+        QueueSoundCloudTrackData soundcloud_track_data = 6;
+        QueueDocumentData document_data = 7;
+    }
+}
+
+message UserStatsRequest {
+    string address = 1;
+}
+
+message UserStatsForPeriod {
+    string total_spent = 1;
+    string total_withdrawn = 2;
+    int32 requested_media_count = 3;
+    google.protobuf.Duration requested_media_play_time = 4;
+}
+
+message UserStatsResponse {
+    UserStatsForPeriod stats_all_time = 1;
+    UserStatsForPeriod stats_30_days = 2;
+    UserStatsForPeriod stats_7_days = 3;
+}
+
+message PlayedMedia {
+    string id = 1;
+    optional User requested_by = 2;
+    string request_cost = 3;
+    google.protobuf.Timestamp enqueued_at = 4;
+    google.protobuf.Timestamp started_at = 5;
+    optional google.protobuf.Timestamp ended_at = 6;
+    google.protobuf.Duration length = 7;
+    google.protobuf.Duration offset = 8;
+    bool unskippable = 9;
+    oneof media_info {
+        QueueYouTubeVideoData youtube_video_data = 10;
+        QueueSoundCloudTrackData soundcloud_track_data = 11;
+        QueueDocumentData document_data = 12;
+    }
+}
+
+message SetProfileBiographyRequest {
+    string biography = 1;
+}
+
+message SetProfileBiographyResponse {}
+
+message SetProfileFeaturedMediaRequest {
+    optional string media_id = 1;
+}
+
+message SetProfileFeaturedMediaResponse {}
+
+message ClearUserProfileRequest {
+    string address = 1;
+}
+
+message ClearUserProfileResponse {}
+
+message PlayedMediaHistoryRequest {
+    PaginationParameters pagination_params = 1;
+    string search_query = 2;
+}
+
+message PlayedMediaHistoryResponse {
+    repeated PlayedMedia played_media = 1;
+    uint64 offset = 2;
+    uint64 total = 3;
+}
+
+message BlockUserRequest {
+    string address = 1;
+}
+
+message BlockUserResponse {}
+
+message UnblockUserRequest {
+    oneof block_identification {
+        string block_id = 1;
+        string address = 2;
+    }
+}
+
+message UnblockUserResponse {}
+
+message BlockedUsersRequest {
+    PaginationParameters pagination_params = 1;
+}
+
+message BlockedUser {
+    string id = 1;
+    User blocked_user = 2;
+    User blocked_by = 3;
+    google.protobuf.Timestamp created_at = 4;
+}
+
+message BlockedUsersResponse {
+    repeated BlockedUser blocked_users = 1;
+    uint64 offset = 2;
+    uint64 total = 3;
+}
+
+message MarkAsActivelyModeratingRequest {}
+
+message MarkAsActivelyModeratingResponse {}
+
+message StopActivelyModeratingRequest {}
+
+message StopActivelyModeratingResponse {}
+
+message PointsInfoRequest {}
+
+message PointsInfoResponse {
+    int32 balance = 1;
+    optional SubscriptionDetails current_subscription = 2;
+}
+
+message SubscriptionDetails {
+    google.protobuf.Timestamp subscribed_at = 1;
+    google.protobuf.Timestamp subscribed_until = 2;
+}
+
+message PointsTransactionsRequest {
+    PaginationParameters pagination_params = 1;
+}
+
+message PointsTransactionsResponse {
+    repeated PointsTransaction transactions = 1;
+    uint64 offset = 2;
+    uint64 total = 3;
+}
+
+message PointsTransaction {
+    int64 id = 1 [jstype = JS_STRING];
+    string rewards_address = 2;
+    google.protobuf.Timestamp created_at = 3;
+    google.protobuf.Timestamp updated_at = 4;
+    int32 value = 5;
+    PointsTransactionType type = 6;
+    map<string, string> extra = 7;
+}
+
+enum PointsTransactionType {
+    UNKNOWN_POINTS_TRANSACTION_TYPE = 0;
+    POINTS_TRANSACTION_TYPE_ACTIVITY_CHALLENGE_REWARD = 1;
+    POINTS_TRANSACTION_TYPE_CHAT_ACTIVITY_REWARD = 2;
+    POINTS_TRANSACTION_TYPE_MEDIA_ENQUEUED_REWARD = 3;
+    POINTS_TRANSACTION_TYPE_CHAT_GIF_ATTACHMENT = 4;
+    POINTS_TRANSACTION_TYPE_MANUAL_ADJUSTMENT = 5;
+    POINTS_TRANSACTION_TYPE_MEDIA_ENQUEUED_REWARD_REVERSAL = 6;
+    POINTS_TRANSACTION_TYPE_CONVERSION_FROM_BANANO = 7;
+    POINTS_TRANSACTION_TYPE_QUEUE_ENTRY_REORDERING = 8;
+    POINTS_TRANSACTION_TYPE_MONTHLY_SUBSCRIPTION = 9;
+    POINTS_TRANSACTION_TYPE_SKIP_THRESHOLD_REDUCTION = 10;
+    POINTS_TRANSACTION_TYPE_SKIP_THRESHOLD_INCREASE = 11;
+    POINTS_TRANSACTION_TYPE_CONCEALED_ENTRY_ENQUEUING = 12;
+    POINTS_TRANSACTION_TYPE_APPLICATION_DEFINED = 13;
+}
+
+message ChatGifSearchRequest {
+    string query = 1;
+    string cursor = 2;
+}
+
+message ChatGifSearchResponse {
+    repeated ChatGifSearchResult results = 1;
+    string next_cursor = 2;
+}
+
+message ChatGifSearchResult {
+    string id = 1;
+    string title = 2;
+    string preview_url = 3;
+    string preview_fallback_url = 4;
+    int32 width = 5;
+    int32 height = 6;
+    int32 points_cost = 7;
+}
+
+message AdjustPointsBalanceRequest {
+    string rewards_address = 1;
+    int32 value = 2;
+    string reason = 3;
+}
+
+message AdjustPointsBalanceResponse {}
+
+message ConvertBananoToPointsRequest {}
+
+message ConvertBananoToPointsStatus {
+    string payment_address = 1;
+    string banano_converted = 2;
+    int32 points_converted = 3;
+    google.protobuf.Timestamp expiration = 4;
+    bool expired = 5;
+}
+
+message StartOrExtendSubscriptionRequest {}
+
+message StartOrExtendSubscriptionResponse {
+    SubscriptionDetails subscription = 1;
+}
+
+message SoundCloudTrackDetailsRequest {
+    string track_url = 1;
+}
+
+message SoundCloudTrackDetailsResponse {
+    google.protobuf.Duration length = 1;
+}
+
+enum VipUserAppearance {
+    UNKNOWN_VIP_USER_APPEARANCE = 0;
+    VIP_USER_APPEARANCE_NORMAL = 1;
+    VIP_USER_APPEARANCE_MODERATOR = 2;
+    VIP_USER_APPEARANCE_VIP = 3;
+    VIP_USER_APPEARANCE_VIP_MODERATOR = 4;
+}
+
+message AddVipUserRequest {
+    string rewards_address = 1;
+    VipUserAppearance appearance = 2;
+}
+
+message AddVipUserResponse {}
+
+message RemoveVipUserRequest {
+    string rewards_address = 1;
+}
+
+message RemoveVipUserResponse {}
+
+message TriggerClientReloadRequest {}
+
+message TriggerClientReloadResponse {}
+
+message IncreaseOrReduceSkipThresholdRequest {
+    bool increase = 1;
+}
+
+message IncreaseOrReduceSkipThresholdResponse {}
+
+message SetMulticurrencyPaymentsEnabledRequest {
+    bool enabled = 1;
+}
+
+message SetMulticurrencyPaymentsEnabledResponse {}
+
+message CheckMediaEnqueuingPasswordRequest {
+    string password = 1;
+}
+
+message CheckMediaEnqueuingPasswordResponse {
+    string password_edition = 1;
+}
+
+message MonitorMediaEnqueuingPermissionRequest {}
+
+message MediaEnqueuingPermissionStatus {
+    AllowedMediaEnqueuingType allowed_media_enqueuing = 1;
+    string password_edition = 2;
+    bool password_is_numeric = 3;
+    bool has_elevated_privileges = 4;
+}
+
+message InvalidateAuthTokensRequest {}
+
+message InvalidateAuthTokensResponse {}
+
+message InvalidateUserAuthTokensRequest {
+    string address = 1;
+}
+
+message InvalidateUserAuthTokensResponse {}
+
+message AuthorizeApplicationRequest {
+    string application_name = 1;
+    PermissionLevel desired_permission_level = 2;
+    string reason = 3;
+}
+
+message AuthorizeApplicationEvent {
+    oneof event {
+        AuthorizeApplicationHeartbeatEvent heartbeat = 1;
+        AuthorizeApplicationAuthorizationURLEvent authorization_url = 2;
+        AuthorizeApplicationApprovedEvent approved = 3;
+    }
+}
+
+message AuthorizeApplicationHeartbeatEvent {}
+
+message AuthorizeApplicationAuthorizationURLEvent {
+    string authorization_url = 1;
+}
+
+message AuthorizeApplicationApprovedEvent {
+    string auth_token = 1;
+    google.protobuf.Timestamp token_expiration = 2;
+}
+
+message AuthorizationProcessDataRequest {
+    string process_id = 1;
+}
+
+message AuthorizationProcessDataResponse {
+    string application_name = 1;
+    PermissionLevel desired_permission_level = 2;
+    string reason = 3;
+}
+
+message ConsentOrDissentToAuthorizationRequest {
+    string process_id = 1;
+    bool consent = 2;
+}
+
+message ConsentOrDissentToAuthorizationResponse {}
