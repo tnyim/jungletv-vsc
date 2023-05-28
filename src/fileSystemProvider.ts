@@ -108,12 +108,24 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 		let fileType: string;
 		if (fileName.endsWith(".js")) {
 			fileType = "text/javascript";
+		} else if (fileName.endsWith(".ts")) {
+			fileType = "text/typescript";
 		} else if (fileName.endsWith(".json")) {
 			fileType = "application/json";
+		} else if (fileName.endsWith(".png")) {
+			fileType = "image/png";
+		} else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+			fileType = "image/jpg";
+		} else if (fileName.endsWith(".gif")) {
+			fileType = "image/gif";
+		} else if (fileName.endsWith(".webp")) {
+			fileType = "image/webp";
 		} else if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
 			fileType = "text/html";
 		} else if (fileName.endsWith(".md")) {
 			fileType = "text/markdown";
+		} else if (fileName.endsWith(".css")) {
+			fileType = "text/css";
 		} else {
 			fileType = "text/plain";
 		}

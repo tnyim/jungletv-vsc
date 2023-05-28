@@ -237,7 +237,8 @@
 				"type": "jungletvaf",
 				"label": "JungleTV Application Console",
 				"languages": [
-					"javascript"
+					"javascript",
+					"typescript"
 				],
 				"configurationAttributes": {
 					"launch": {
