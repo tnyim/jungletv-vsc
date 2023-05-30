@@ -404,7 +404,7 @@ class JungleTVExtensionImpl implements JungleTVExtension {
 			await this.forgetAuthSecretForEndpoint(endpoint!);
 			await this.getConfiguredEnvironments();
 		};
-		if(useMutex) {
+		if (useMutex) {
 			await this.apiClientCreationMutex.runExclusive(p);
 		} else {
 			await p();

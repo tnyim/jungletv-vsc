@@ -1,11 +1,12 @@
+import { Mutex } from 'async-mutex';
 import { Timestamp } from 'google-protobuf/google/protobuf/timestamp_pb';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { APIClient } from './api_client';
 import { JungleTVApplication, JungleTVExtension } from './interfaces';
-import { ApplicationFile, ApplicationFilesRequest, CloneApplicationFileRequest, DeleteApplicationFileRequest, GetApplicationFileRequest, GetApplicationRequest } from './proto/application_editor_pb';
+import { ApplicationFile, ApplicationFilesRequest, CloneApplicationFileRequest, DeleteApplicationFileRequest, GetApplicationFileRequest, GetApplicationRequest, TypeScriptTypeDefinitionsRequest } from './proto/application_editor_pb';
 import { JungleTV } from './proto/jungletv_pb_service';
 import { applicationResource, authorityToEndpoint, fileResource } from './utils';
-import { APIClient } from './api_client';
 
 export type ParsedURI = {
 	application: JungleTVApplication,
@@ -25,6 +26,7 @@ export type JungleTVAFApplicationMetadata = {
 	updatedAt: Date,
 };
 
+const tsTypesFilename = "*jungletv.d.ts";
 export class JungleTVAFFS implements vscode.FileSystemProvider {
 	static DefaultScheme = "jungletvaf" as const;
 	private scheme: string;
@@ -38,6 +40,9 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 	private appMetadata = new Map<string, JungleTVAFApplicationMetadata>();
 	private appMetadataUpdaterEmitter = new vscode.EventEmitter<Map<string, JungleTVAFApplicationMetadata>>();
 	onApplicationMetadataUpdated: vscode.Event<Map<string, JungleTVAFApplicationMetadata>> = this.appMetadataUpdaterEmitter.event;
+
+	// maps endpoints to TS type definitions
+	private typeDefinitionsPerEndpoint = new Map<string, Uint8Array>();
 
 	constructor(extension: JungleTVExtension, scheme: string) {
 		this.extension = extension;
@@ -82,12 +87,50 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 		};
 	}
 
+	private typeDefinitionsFetchMutex = new Mutex();
 	private async getClient(endpoint: string): Promise<APIClient> {
 		const apiClient = await this.extension.getAPIClient(endpoint);
 		if (typeof apiClient === "undefined") {
 			throw vscode.FileSystemError.Unavailable(`JungleTV environment at ${endpoint} is not configured`);
 		}
+		await this.typeDefinitionsFetchMutex.runExclusive(async () => {
+			if (!this.typeDefinitionsPerEndpoint.has(endpoint)) {
+				const files = vscode.workspace.getConfiguration('files');
+				const exclude = files.get<{ [key: string]: boolean }>('exclude') ?? {};
+				exclude["**/[*]jungletv.d.ts"] = true;
+				await files.update('exclude', exclude, vscode.ConfigurationTarget.Workspace);
+
+				try {
+					const response = await apiClient.unaryRPC(JungleTV.TypeScriptTypeDefinitions, new TypeScriptTypeDefinitionsRequest());
+					this.typeDefinitionsPerEndpoint.set(endpoint, response.getTypeDefinitionsFile_asU8());
+
+					// run this asynchronously
+					this.brieflyOpenTypesFile(endpoint);
+				} catch (e) {
+					console.log(`Failed to fetch TypeScript type definitions for endpoint ${endpoint}`, e);
+				}
+			}
+		});
 		return apiClient;
+	}
+
+	private async brieflyOpenTypesFile(endpoint: string) {
+		const uri = fileResource({ endpoint, id: "any" }, tsTypesFilename);
+		const doc = await vscode.workspace.openTextDocument(uri);
+		await vscode.window.showTextDocument(doc, {
+			viewColumn: vscode.ViewColumn.Active,
+			preserveFocus: true,
+			preview: false,
+		});
+		for (const tab of vscode.window.tabGroups.all.map(tg => tg.tabs).flat()) {
+			try {
+				if (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()) {
+					await vscode.window.tabGroups.close(tab);
+				}
+			} catch {
+				// try on the next tab
+			}
+		}
 	}
 
 	private catchError(e: unknown): never {
@@ -135,6 +178,16 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 	async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
 		const parsedUri = this.parseURI(uri);
 		const apiClient = await this.getClient(parsedUri.application.endpoint);
+
+		if (parsedUri.fileName === tsTypesFilename) {
+			return {
+				type: vscode.FileType.File,
+				size: this.typeDefinitionsPerEndpoint.get(parsedUri.application.endpoint)?.length ?? 0,
+				ctime: 0,
+				mtime: 0,
+				permissions: vscode.FilePermission.Readonly,
+			};
+		}
 
 		try {
 			if (typeof parsedUri.fileName == "undefined") {
@@ -209,6 +262,8 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 				fileType: applicationFile.getType(),
 			});
 		}
+
+		result.push([tsTypesFilename, vscode.FileType.File]);
 		this.metadata = metadata;
 		this.metadataUpdaterEmitter.fire(this.fileMetadata());
 		return result;
@@ -217,6 +272,10 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
 		const parsedUri = this.parseURI(uri);
 		const apiClient = await this.getClient(parsedUri.application.endpoint);
+
+		if (parsedUri.fileName === tsTypesFilename) {
+			return this.typeDefinitionsPerEndpoint.get(parsedUri.application.endpoint) ?? new Uint8Array();
+		}
 
 		try {
 			const request = new GetApplicationFileRequest();
@@ -232,10 +291,19 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 
 	async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
 		const parsedUri = this.parseURI(uri);
+
+		if (parsedUri.fileName === tsTypesFilename) {
+			throw vscode.FileSystemError.NoPermissions("The type definitions file is special and cannot be edited");
+		}
+
 		const apiClient = await this.getClient(parsedUri.application.endpoint);
 
 		if (typeof parsedUri.fileName === "undefined") {
 			throw new Error("A filename could not be identified from the supplied URI");
+		}
+
+		if (parsedUri.fileName?.startsWith("*")) {
+			throw new Error("Invalid filename");
 		}
 
 		let existingFile: ApplicationFile | undefined;
@@ -337,10 +405,15 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 			throw vscode.FileSystemError.Unavailable("Copying directories is unsupported");
 		}
 
+		if (parsedDestinationUri.fileName?.startsWith("*")) {
+			throw new Error("Invalid filename");
+		}
+
 		if (parsedSourceUri.application.endpoint !== parsedDestinationUri.application.endpoint) {
 			await this.copyBetweenEnvironments(source, destination, options);
 			return;
 		}
+
 
 		const apiClient = await this.getClient(parsedSourceUri.application.endpoint);
 
@@ -404,8 +477,13 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 	}
 
 	async rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean }): Promise<void> {
+		const parsedOldUri = this.parseURI(oldUri);
+		if (parsedOldUri.fileName === tsTypesFilename) {
+			throw vscode.FileSystemError.NoPermissions("The type definitions file is special and cannot be renamed");
+		}
+
 		const readWriteOld = this.appMetadata.get(
-			applicationResource(this.parseURI(oldUri).application).toString())?.allowFileEditing ?? true;
+			applicationResource(parsedOldUri.application).toString())?.allowFileEditing ?? true;
 		if (!readWriteOld) {
 			throw vscode.FileSystemError.NoPermissions("Application currently read-only");
 		}
@@ -416,6 +494,10 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 			throw vscode.FileSystemError.NoPermissions("Application currently read-only");
 		}
 
+		if (this.parseURI(newUri).fileName?.startsWith("*")) {
+			throw new Error("Invalid filename");
+		}
+
 		await this.copy(oldUri, newUri, options);
 		await this.delete(oldUri);
 	}
@@ -424,6 +506,10 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 		const parsedUri = this.parseURI(uri);
 		const apiClient = await this.getClient(parsedUri.application.endpoint);
 		const dirname = uri.with({ path: path.posix.dirname(uri.path) });
+
+		if (parsedUri.fileName?.startsWith("*")) {
+			throw new Error("Invalid filename");
+		}
 
 		try {
 			const request = new DeleteApplicationFileRequest();
