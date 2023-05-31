@@ -120,14 +120,14 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 			this.brieflyOpenedTypeDefinitionsForApplication.add(appResourceString);
 
 			// run this asynchronously
-			this.brieflyOpenTypesFile(application.endpoint);
+			this.brieflyOpenTypesFile(application);
 		}
 	}
 
-	private async brieflyOpenTypesFile(endpoint: string) {
+	private async brieflyOpenTypesFile(application: JungleTVApplication) {
 		try {
-			await this.getClient(endpoint); // ensure we actually attempted to load the types
-			const uri = fileResource({ endpoint, id: "any" }, tsTypesFilename);
+			await this.getClient(application.endpoint); // ensure we actually attempted to load the types
+			const uri = fileResource(application, tsTypesFilename);
 			const doc = await vscode.workspace.openTextDocument(uri);
 			await vscode.window.showTextDocument(doc, {
 				viewColumn: vscode.ViewColumn.Active,
