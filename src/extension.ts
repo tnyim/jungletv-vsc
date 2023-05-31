@@ -551,6 +551,7 @@ class JungleTVExtensionImpl implements JungleTVExtension {
 				id: response.getId(),
 			});
 
+			this.fs.prepareForOpeningApplication({ endpoint, id: response.getId() });
 			vscode.workspace.updateWorkspaceFolders(0, 0, { uri: uri, name: `Application ${applicationID} on ${beautifyEndpoint(endpoint)}` });
 		} catch (e) {
 			vscode.window.showErrorMessage(`An error ocurred when loading the application: ${e}`);

@@ -44,6 +44,9 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 	// maps endpoints to TS type definitions
 	private typeDefinitionsPerEndpoint = new Map<string, Uint8Array>();
 
+	// contains application resource URIs for which we already did the typescript extension "priming" by briefly opening the types definition file
+	private brieflyOpenedTypeDefinitionsForApplication = new Set<string>();
+
 	constructor(extension: JungleTVExtension, scheme: string) {
 		this.extension = extension;
 		this.scheme = scheme;
@@ -103,9 +106,6 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 				try {
 					const response = await apiClient.unaryRPC(JungleTV.TypeScriptTypeDefinitions, new TypeScriptTypeDefinitionsRequest());
 					this.typeDefinitionsPerEndpoint.set(endpoint, response.getTypeDefinitionsFile_asU8());
-
-					// run this asynchronously
-					this.brieflyOpenTypesFile(endpoint);
 				} catch (e) {
 					console.log(`Failed to fetch TypeScript type definitions for endpoint ${endpoint}`, e);
 				}
@@ -114,22 +114,37 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 		return apiClient;
 	}
 
+	public prepareForOpeningApplication(application: JungleTVApplication) {
+		const appResourceString = applicationResource(application).toString();
+		if (!this.brieflyOpenedTypeDefinitionsForApplication.has(appResourceString)) {
+			this.brieflyOpenedTypeDefinitionsForApplication.add(appResourceString);
+
+			// run this asynchronously
+			this.brieflyOpenTypesFile(application.endpoint);
+		}
+	}
+
 	private async brieflyOpenTypesFile(endpoint: string) {
-		const uri = fileResource({ endpoint, id: "any" }, tsTypesFilename);
-		const doc = await vscode.workspace.openTextDocument(uri);
-		await vscode.window.showTextDocument(doc, {
-			viewColumn: vscode.ViewColumn.Active,
-			preserveFocus: true,
-			preview: false,
-		});
-		for (const tab of vscode.window.tabGroups.all.map(tg => tg.tabs).flat()) {
-			try {
-				if (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()) {
-					await vscode.window.tabGroups.close(tab);
+		try {
+			await this.getClient(endpoint); // ensure we actually attempted to load the types
+			const uri = fileResource({ endpoint, id: "any" }, tsTypesFilename);
+			const doc = await vscode.workspace.openTextDocument(uri);
+			await vscode.window.showTextDocument(doc, {
+				viewColumn: vscode.ViewColumn.Active,
+				preserveFocus: true,
+				preview: false,
+			});
+			for (const tab of vscode.window.tabGroups.all.map(tg => tg.tabs).flat()) {
+				try {
+					if (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()) {
+						await vscode.window.tabGroups.close(tab);
+					}
+				} catch {
+					// try on the next tab
 				}
-			} catch {
-				// try on the next tab
 			}
+		} catch {
+			// everything about this is very "best effort"
 		}
 	}
 
@@ -272,6 +287,8 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
 		const parsedUri = this.parseURI(uri);
 		const apiClient = await this.getClient(parsedUri.application.endpoint);
+
+		this.prepareForOpeningApplication(parsedUri.application);
 
 		if (parsedUri.fileName === tsTypesFilename) {
 			return this.typeDefinitionsPerEndpoint.get(parsedUri.application.endpoint) ?? new Uint8Array();
