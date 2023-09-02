@@ -94,7 +94,7 @@ export class JungleTVAFDebugProvider implements vscode.DebugConfigurationProvide
                             if (runningApplicationIDs.includes(application.id)) {
                                 return this.getAttachToApplicationConfiguration(application, false, debugConfiguration, folder);
                             }
-                            return this.getLaunchApplicationConfiguration(application, false, false, debugConfiguration, folder);
+                            return this.getLaunchApplicationConfiguration(application, false, true, debugConfiguration, folder);
                         } catch {
                             return null;
                         }
@@ -159,6 +159,7 @@ export class JungleTVDebugSession extends DebugSession implements DebugAdapter {
     private application: JungleTVApplication;
     private restartApplicationIfRunning = false;
     private showOlderLogs = false;
+    private latestLogCursor = "";
 
     private hadBeenConnected = false;
     private _apiClient: APIClient | undefined;
@@ -255,12 +256,15 @@ export class JungleTVDebugSession extends DebugSession implements DebugAdapter {
     private async connectToApplication() {
         const apiClient = await this.apiClient();
 
-        const request = new ConsumeApplicationLogRequest();
-        request.setApplicationId(this.application.id);
-
-        const consumeApplicationLog = function (
+        const consumeApplicationLog = (
             onUpdate: (update: ApplicationLogEntryContainer) => void,
-            onEnd: (code: grpc.Code, msg: string) => void): Request {
+            onEnd: (code: grpc.Code, msg: string) => void): Request => {
+            const request = new ConsumeApplicationLogRequest();
+            request.setApplicationId(this.application.id);
+            if (this.showOlderLogs) {
+                request.setIncludeLogsSinceOffset(this.latestLogCursor);
+            }
+
             return apiClient.serverStreamingRPC(
                 JungleTV.ConsumeApplicationLog,
                 request,
@@ -284,6 +288,7 @@ export class JungleTVDebugSession extends DebugSession implements DebugAdapter {
         if (!entry) {
             return;
         }
+        this.latestLogCursor = entry.getCursor();
         this.emitApplicationLogEntry(entry);
     }
 
@@ -355,6 +360,7 @@ export class JungleTVDebugSession extends DebugSession implements DebugAdapter {
             this.resolveDisconnect = undefined;
 
             this.sendEvent(new OutputEvent(`Relaunching application...\n`, "console"));
+            this.showOlderLogs = true;
 
             const launchRequest = new LaunchApplicationRequest();
             launchRequest.setId(this.application.id);

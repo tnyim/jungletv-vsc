@@ -12,6 +12,19 @@ export class SignInRequest extends jspb.Message {
   getRewardsAddress(): string;
   setRewardsAddress(value: string): void;
 
+  getViaSignature(): boolean;
+  setViaSignature(value: boolean): void;
+
+  hasOngoingProcessId(): boolean;
+  clearOngoingProcessId(): void;
+  getOngoingProcessId(): string;
+  setOngoingProcessId(value: string): void;
+
+  hasLabSignInOptions(): boolean;
+  clearLabSignInOptions(): void;
+  getLabSignInOptions(): LabSignInOptions | undefined;
+  setLabSignInOptions(value?: LabSignInOptions): void;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SignInRequest.AsObject;
   static toObject(includeInstance: boolean, msg: SignInRequest): SignInRequest.AsObject;
@@ -25,6 +38,35 @@ export class SignInRequest extends jspb.Message {
 export namespace SignInRequest {
   export type AsObject = {
     rewardsAddress: string,
+    viaSignature: boolean,
+    ongoingProcessId: string,
+    labSignInOptions?: LabSignInOptions.AsObject,
+  }
+}
+
+export class LabSignInOptions extends jspb.Message {
+  getDesiredPermissionLevel(): PermissionLevelMap[keyof PermissionLevelMap];
+  setDesiredPermissionLevel(value: PermissionLevelMap[keyof PermissionLevelMap]): void;
+
+  hasCredential(): boolean;
+  clearCredential(): void;
+  getCredential(): string;
+  setCredential(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LabSignInOptions.AsObject;
+  static toObject(includeInstance: boolean, msg: LabSignInOptions): LabSignInOptions.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: LabSignInOptions, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LabSignInOptions;
+  static deserializeBinaryFromReader(message: LabSignInOptions, reader: jspb.BinaryReader): LabSignInOptions;
+}
+
+export namespace LabSignInOptions {
+  export type AsObject = {
+    desiredPermissionLevel: PermissionLevelMap[keyof PermissionLevelMap],
+    credential: string,
   }
 }
 
@@ -49,6 +91,11 @@ export class SignInProgress extends jspb.Message {
   getAccountUnopened(): SignInAccountUnopened | undefined;
   setAccountUnopened(value?: SignInAccountUnopened): void;
 
+  hasMessageToSign(): boolean;
+  clearMessageToSign(): void;
+  getMessageToSign(): SignInMessageToSign | undefined;
+  setMessageToSign(value?: SignInMessageToSign): void;
+
   getStepCase(): SignInProgress.StepCase;
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SignInProgress.AsObject;
@@ -66,6 +113,7 @@ export namespace SignInProgress {
     response?: SignInResponse.AsObject,
     expired?: SignInVerificationExpired.AsObject,
     accountUnopened?: SignInAccountUnopened.AsObject,
+    messageToSign?: SignInMessageToSign.AsObject,
   }
 
   export enum StepCase {
@@ -74,10 +122,14 @@ export namespace SignInProgress {
     RESPONSE = 2,
     EXPIRED = 3,
     ACCOUNT_UNOPENED = 4,
+    MESSAGE_TO_SIGN = 5,
   }
 }
 
 export class SignInVerification extends jspb.Message {
+  getProcessId(): string;
+  setProcessId(value: string): void;
+
   getVerificationRepresentativeAddress(): string;
   setVerificationRepresentativeAddress(value: string): void;
 
@@ -98,6 +150,7 @@ export class SignInVerification extends jspb.Message {
 
 export namespace SignInVerification {
   export type AsObject = {
+    processId: string,
     verificationRepresentativeAddress: string,
     expiration?: google_protobuf_timestamp_pb.Timestamp.AsObject,
   }
@@ -158,6 +211,64 @@ export class SignInVerificationExpired extends jspb.Message {
 
 export namespace SignInVerificationExpired {
   export type AsObject = {
+  }
+}
+
+export class SignInMessageToSign extends jspb.Message {
+  getProcessId(): string;
+  setProcessId(value: string): void;
+
+  getSubmissionUrl(): string;
+  setSubmissionUrl(value: string): void;
+
+  getMessage(): string;
+  setMessage(value: string): void;
+
+  hasExpiration(): boolean;
+  clearExpiration(): void;
+  getExpiration(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setExpiration(value?: google_protobuf_timestamp_pb.Timestamp): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SignInMessageToSign.AsObject;
+  static toObject(includeInstance: boolean, msg: SignInMessageToSign): SignInMessageToSign.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: SignInMessageToSign, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SignInMessageToSign;
+  static deserializeBinaryFromReader(message: SignInMessageToSign, reader: jspb.BinaryReader): SignInMessageToSign;
+}
+
+export namespace SignInMessageToSign {
+  export type AsObject = {
+    processId: string,
+    submissionUrl: string,
+    message: string,
+    expiration?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
+}
+
+export class VerifySignInSignatureRequest extends jspb.Message {
+  getProcessId(): string;
+  setProcessId(value: string): void;
+
+  getSignatureHex(): string;
+  setSignatureHex(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VerifySignInSignatureRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: VerifySignInSignatureRequest): VerifySignInSignatureRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: VerifySignInSignatureRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VerifySignInSignatureRequest;
+  static deserializeBinaryFromReader(message: VerifySignInSignatureRequest, reader: jspb.BinaryReader): VerifySignInSignatureRequest;
+}
+
+export namespace VerifySignInSignatureRequest {
+  export type AsObject = {
+    processId: string,
+    signatureHex: string,
   }
 }
 
@@ -432,10 +543,15 @@ export class EnqueueMediaTicket extends jspb.Message {
   getCurrentlyPlayingIsUnskippable(): boolean;
   setCurrentlyPlayingIsUnskippable(value: boolean): void;
 
-  hasMediaLength(): boolean;
-  clearMediaLength(): void;
-  getMediaLength(): google_protobuf_duration_pb.Duration | undefined;
-  setMediaLength(value?: google_protobuf_duration_pb.Duration): void;
+  hasLength(): boolean;
+  clearLength(): void;
+  getLength(): google_protobuf_duration_pb.Duration | undefined;
+  setLength(value?: google_protobuf_duration_pb.Duration): void;
+
+  hasOffset(): boolean;
+  clearOffset(): void;
+  getOffset(): google_protobuf_duration_pb.Duration | undefined;
+  setOffset(value?: google_protobuf_duration_pb.Duration): void;
 
   clearExtraCurrencyPaymentDataList(): void;
   getExtraCurrencyPaymentDataList(): Array<ExtraCurrencyPaymentData>;
@@ -480,7 +596,8 @@ export namespace EnqueueMediaTicket {
     unskippable: boolean,
     concealed: boolean,
     currentlyPlayingIsUnskippable: boolean,
-    mediaLength?: google_protobuf_duration_pb.Duration.AsObject,
+    length?: google_protobuf_duration_pb.Duration.AsObject,
+    offset?: google_protobuf_duration_pb.Duration.AsObject,
     extraCurrencyPaymentDataList: Array<ExtraCurrencyPaymentData.AsObject>,
     youtubeVideoData?: QueueYouTubeVideoData.AsObject,
     soundcloudTrackData?: QueueSoundCloudTrackData.AsObject,
@@ -489,9 +606,9 @@ export namespace EnqueueMediaTicket {
 
   export enum MediaInfoCase {
     MEDIA_INFO_NOT_SET = 0,
-    YOUTUBE_VIDEO_DATA = 13,
-    SOUNDCLOUD_TRACK_DATA = 14,
-    DOCUMENT_DATA = 15,
+    YOUTUBE_VIDEO_DATA = 14,
+    SOUNDCLOUD_TRACK_DATA = 15,
+    DOCUMENT_DATA = 16,
   }
 }
 
