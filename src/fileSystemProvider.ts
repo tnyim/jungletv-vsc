@@ -368,9 +368,9 @@ export class JungleTVAFFS implements vscode.FileSystemProvider {
 
 				const publicPickOption = await vscode.window.showQuickPick([
 					"Public",
-					"Private"
+					"Internal"
 				], {
-					title: `Should ${parsedUri.fileName} be public (served over HTTP) or private?`,
+					title: `Should ${parsedUri.fileName} be public (served over HTTP) or internal?`,
 					canPickMany: false,
 					ignoreFocusOut: true,
 				});
