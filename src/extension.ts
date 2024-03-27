@@ -373,7 +373,12 @@ class JungleTVExtensionImpl implements JungleTVExtension {
 		for (const tab of vscode.window.tabGroups.all.map(tg => tg.tabs).flat()) {
 			try {
 				if (tab.input instanceof vscode.TabInputText && resourceToFile(tab.input.uri).application.endpoint == endpoint) {
-					await vscode.window.tabGroups.close(tab);
+					const promise = vscode.window.tabGroups.close(tab);
+					if (!tab.isDirty) {
+						// only await the promise if the tab is not dirty,
+						// otherwise we'll be waiting potentially forever if the user declines to close the tab
+						await promise;
+					}
 				}
 			} catch {
 				// likely not a jungletvaf file
