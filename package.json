@@ -2,7 +2,7 @@
 	"name": "jungletv-vsc",
 	"displayName": "JungleTV AF development helper",
 	"description": "Helper for developing applications targeting the JungleTV Application Framework",
-	"version": "0.2.3",
+	"version": "0.2.4",
 	"publisher": "jungletv-team",
 	"private": true,
 	"license": "MIT",
