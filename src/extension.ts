@@ -216,34 +216,36 @@ class JungleTVExtensionImpl implements JungleTVExtension {
 
 	private apiClientCreationMutex = new Mutex();
 	async getAPIClient(endpoint: string): Promise<APIClient | undefined> {
-		return this.apiClientCreationMutex.runExclusive(async () => {
-			if (this.apiClients.has(endpoint)) {
-				return this.apiClients.get(endpoint)!;
-			}
+		return this.apiClientCreationMutex.runExclusive(() => this.getAPIClientInsideMutex(endpoint));
+	}
 
-			const secret = await this.getAuthSecretForEndpoint(endpoint);
-			if (typeof secret === "undefined") {
-				const choice = await vscode.window.showInformationMessage(
-					`Authentication token for JungleTV environment ${beautifyEndpoint(endpoint)} missing or expired. Reauthorize the JungleTV AF development helper on this environment, or remove it?`,
-					{
-						modal: true,
-					},
-					"Remove environment", "Reauthorize");
-				if (choice == 'Reauthorize') {
-					await this.configureNewEnvironment(endpoint);
-					return this.getAPIClient(endpoint);
-				}
-				await this.forgetEnvironment(endpoint, false);
-				return undefined;
-			}
+	private async getAPIClientInsideMutex(endpoint: string): Promise<APIClient | undefined> {
+		if (this.apiClients.has(endpoint)) {
+			return this.apiClients.get(endpoint)!;
+		}
 
-			const client = new APIClient(endpoint, secret, (token, expiry) => {
-				this.setAuthSecretForEndpoint(endpoint, token, expiry);
-			});
-			this.apiClients.set(endpoint, client);
-			this.startLongLivedConnectionsForEndpoint(endpoint, client);
-			return client;
+		const secret = await this.getAuthSecretForEndpoint(endpoint);
+		if (typeof secret === "undefined") {
+			const choice = await vscode.window.showInformationMessage(
+				`Authentication token for JungleTV environment ${beautifyEndpoint(endpoint)} missing or expired. Reauthorize the JungleTV AF development helper on this environment, or remove it?`,
+				{
+					modal: true,
+				},
+				"Remove environment", "Reauthorize");
+			if (choice == 'Reauthorize') {
+				await this.configureNewEnvironment(endpoint);
+				return this.getAPIClientInsideMutex(endpoint);
+			}
+			await this.forgetEnvironment(endpoint, false);
+			return undefined;
+		}
+
+		const client = new APIClient(endpoint, secret, (token, expiry) => {
+			this.setAuthSecretForEndpoint(endpoint, token, expiry);
 		});
+		this.apiClients.set(endpoint, client);
+		this.startLongLivedConnectionsForEndpoint(endpoint, client);
+		return client;
 	}
 
 	private async startLongLivedConnectionsForEndpoint(endpoint: string, client: APIClient) {
