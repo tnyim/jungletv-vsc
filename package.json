@@ -201,6 +201,11 @@
 					"command": "jungletvaf.setFileMimeType",
 					"group": "7_modification",
 					"when": "!explorerResourceIsFolder && resourceScheme == jungletvaf"
+				},
+				{
+					"command": "jungletvaf.editApplication",
+					"group": "2_workspace",
+					"when": "jungletvaf.hasConfiguredEnvironments"
 				}
 			],
 			"debug/toolBar": [
