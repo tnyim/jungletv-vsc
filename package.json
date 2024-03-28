@@ -2,7 +2,7 @@
 	"name": "jungletv-vsc",
 	"displayName": "JungleTV AF development helper",
 	"description": "Helper for developing applications targeting the JungleTV Application Framework",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"publisher": "jungletv-team",
 	"private": true,
 	"license": "MIT",
@@ -41,7 +41,7 @@
 				"category": "JungleTV AF"
 			},
 			{
-				"command": "jungletvaf.editApplication",
+				"command": "jungletvaf.addApplicationToWorkspace",
 				"title": "Add Application to Workspace",
 				"category": "JungleTV AF",
 				"enablement": "jungletvaf.hasConfiguredEnvironments"
@@ -112,7 +112,7 @@
 					"when": "true"
 				},
 				{
-					"command": "jungletvaf.editApplication",
+					"command": "jungletvaf.addApplicationToWorkspace",
 					"when": "jungletvaf.hasConfiguredEnvironments"
 				},
 				{
@@ -203,7 +203,7 @@
 					"when": "!explorerResourceIsFolder && resourceScheme == jungletvaf"
 				},
 				{
-					"command": "jungletvaf.editApplication",
+					"command": "jungletvaf.addApplicationToWorkspace",
 					"group": "2_workspace",
 					"when": "jungletvaf.hasConfiguredEnvironments"
 				}
@@ -270,7 +270,7 @@
 		"viewsWelcome": [
 			{
 				"view": "explorer",
-				"contents": "You can also open a JungleTV application for editing.\n[Open JungleTV Application](command:jungletvaf.editApplication)",
+				"contents": "You can also open a JungleTV application for editing.\n[Open JungleTV Application](command:jungletvaf.addApplicationToWorkspace)",
 				"when": "jungletvaf.hasConfiguredEnvironments"
 			},
 			{

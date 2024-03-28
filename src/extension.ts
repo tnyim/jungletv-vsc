@@ -95,7 +95,7 @@ class JungleTVExtensionImpl implements JungleTVExtension {
 		context.subscriptions.push(vscode.commands.registerCommand('jungletvaf.configureNewEnvironment', this.configureNewEnvironment, this));
 		context.subscriptions.push(vscode.commands.registerCommand('jungletvaf.forgetEnvironment', this.forgetEnvironment, this));
 
-		context.subscriptions.push(vscode.commands.registerCommand('jungletvaf.editApplication', this.editApplication, this));
+		context.subscriptions.push(vscode.commands.registerCommand('jungletvaf.addApplicationToWorkspace', this.addApplicationToWorkspace, this));
 
 		context.subscriptions.push(this.fs.onMetadataUpdated((metadata => {
 			const publicFiles: vscode.Uri[] = [];
@@ -468,99 +468,96 @@ class JungleTVExtensionImpl implements JungleTVExtension {
 		return await promise;
 	}
 
-	private async editApplication(endpoint?: string, applicationID?: string): Promise<void> {
-		if (typeof endpoint === "undefined") {
-			type itemType = QuickPickItem & { isAddOption: boolean, endpoint?: string };
-			const environments = this.ctx.globalState.get<string[]>(GlobalStateKeys.Environments) ?? [];
-			const items = environments.map(e => {
-				const item: itemType = {
-					label: beautifyEndpoint(e),
-					isAddOption: false,
-					endpoint: e,
-				};
-				return item;
-			});
-			items.push({
-				isAddOption: true,
-				label: "Configure New Environment",
-			});
+	private async addApplicationToWorkspace(): Promise<void> {
+		type itemType = QuickPickItem & { isAddOption: boolean, endpoint?: string };
+		const environments = this.ctx.globalState.get<string[]>(GlobalStateKeys.Environments) ?? [];
+		const items = environments.map(e => {
+			const item: itemType = {
+				label: beautifyEndpoint(e),
+				isAddOption: false,
+				endpoint: e,
+			};
+			return item;
+		});
+		items.push({
+			isAddOption: true,
+			label: "Configure New Environment",
+		});
 
-			const selectedItem = await vscode.window.showQuickPick(items, {
-				title: "Select the environment where the application is located",
-				canPickMany: false,
-			});
-			if (!selectedItem) {
+		const selectedItem = await vscode.window.showQuickPick(items, {
+			title: "Select the environment where the application is located",
+			canPickMany: false,
+		});
+		if (!selectedItem) {
+			return;
+		}
+		let endpoint = "";
+		if (selectedItem?.isAddOption) {
+			const maybeEnv = await this.configureNewEnvironment();
+			if (!maybeEnv) {
 				return;
 			}
-			if (selectedItem?.isAddOption) {
-				const maybeEnv = await this.configureNewEnvironment();
-				if (!maybeEnv) {
-					return;
-				}
-				endpoint = maybeEnv;
-			}
-			endpoint = selectedItem.endpoint!;
+			endpoint = maybeEnv;
 		}
+		endpoint = selectedItem.endpoint!;
 		const apiClient = await this.getAPIClient(endpoint); // this might take a while as it might prompt for reauth
 		if (typeof apiClient === "undefined") {
 			vscode.window.showErrorMessage(`Can't add application as the environment at ${beautifyEndpoint(endpoint)} is not configured.`);
 			return;
 		}
 
-		if (typeof applicationID === "undefined") {
-			const response = await apiClient.unaryRPC(JungleTV.Applications, new ApplicationsRequest());
-			const options: (QuickPickItem & { applicationID?: string, isCreateAppOption: boolean })[] = response.getApplicationsList().map(a => ({
-				isCreateAppOption: false,
-				applicationID: a.getId(),
-				label: a.getId(),
-			}));
-			options.push({
-				isCreateAppOption: true,
-				label: "Create New Application",
-			});
-			const picked = await vscode.window.showQuickPick(options, {
-				title: "Select the application to add to the workspace",
-				ignoreFocusOut: true,
-				canPickMany: false,
-			});
-			if (typeof picked === "undefined") {
-				return;
-			}
-			if (picked.isCreateAppOption) {
-				for (; ;) {
-					const id = await vscode.window.showInputBox({
-						title: "Create New Application",
-						prompt: "Enter the ID for the new application",
-						ignoreFocusOut: true,
-					});
-					if (typeof id === "undefined") {
-						return;
-					}
+		const response = await apiClient.unaryRPC(JungleTV.Applications, new ApplicationsRequest());
+		const options: (QuickPickItem & { applicationID?: string, isCreateAppOption: boolean })[] = response.getApplicationsList().map(a => ({
+			isCreateAppOption: false,
+			applicationID: a.getId(),
+			label: a.getId(),
+		}));
+		options.push({
+			isCreateAppOption: true,
+			label: "Create New Application",
+		});
+		const picked = await vscode.window.showQuickPick(options, {
+			title: "Select the application to add to the workspace",
+			ignoreFocusOut: true,
+			canPickMany: false,
+		});
+		if (typeof picked === "undefined") {
+			return;
+		}
+		let applicationID = "";
+		if (picked.isCreateAppOption) {
+			for (; ;) {
+				const id = await vscode.window.showInputBox({
+					title: "Create New Application",
+					prompt: "Enter the ID for the new application",
+					ignoreFocusOut: true,
+				});
+				if (typeof id === "undefined") {
+					return;
+				}
 
+				try {
+					const request = new GetApplicationRequest();
+					request.setId(id);
+					await apiClient.unaryRPC(JungleTV.GetApplication, request);
+					vscode.window.showInformationMessage(`Application ${id} already exists`);
+					continue;
+				} catch {
+					const request = new Application();
+					request.setId(id);
+					request.setAllowFileEditing(true);
 					try {
-						const request = new GetApplicationRequest();
-						request.setId(id);
-						await apiClient.unaryRPC(JungleTV.GetApplication, request);
-						vscode.window.showInformationMessage(`Application ${id} already exists`);
-						continue;
-					} catch {
-						const request = new Application();
-						request.setId(id);
-						request.setAllowFileEditing(true);
-						try {
-							await apiClient.unaryRPC(JungleTV.UpdateApplication, request);
-							applicationID = id;
-							break;
-						} catch (e) {
-							vscode.window.showErrorMessage(`Failed to create the application: ${e}`);
-						}
+						await apiClient.unaryRPC(JungleTV.UpdateApplication, request);
+						applicationID = id;
+						break;
+					} catch (e) {
+						vscode.window.showErrorMessage(`Failed to create the application: ${e}`);
 					}
 				}
-			} else {
-				applicationID = picked.applicationID!;
 			}
+		} else {
+			applicationID = picked.applicationID!;
 		}
-
 		try {
 			const r = new GetApplicationRequest();
 			r.setId(applicationID);
