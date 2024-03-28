@@ -13,6 +13,7 @@ import { Application, ApplicationsRequest, GetApplicationRequest, MonitorRunning
 import { AuthorizeApplicationEvent, AuthorizeApplicationRequest, PermissionLevel, UserPermissionLevelRequest } from './proto/jungletv_pb';
 import { JungleTV } from './proto/jungletv_pb_service';
 import { JungleTVTaskProvider } from './tasks';
+import { UnsafeSecretStorage } from './unsafeSecretStorage';
 import { applicationResource, beautifyEndpoint, resourceToApplication, resourceToFile } from './utils';
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -22,10 +23,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
 abstract class GlobalStateKeys {
 	static readonly Environments = "environments" as const;
+	static readonly UnsafeSecrets = "unsafesecrets" as const;
 }
 
 class JungleTVExtensionImpl implements JungleTVExtension {
 	private ctx: vscode.ExtensionContext;
+	private secretStorage: vscode.SecretStorage;
 	private fs: JungleTVAFFS;
 	private taskProvider: JungleTVTaskProvider;
 	private debugProvider: JungleTVAFDebugProvider;
@@ -38,6 +41,16 @@ class JungleTVExtensionImpl implements JungleTVExtension {
 		this.fs = new JungleTVAFFS(this, JungleTVAFFS.DefaultScheme);
 		this.taskProvider = new JungleTVTaskProvider(this);
 		this.debugProvider = new JungleTVAFDebugProvider(this);
+		this.secretStorage = this.ctx.secrets;
+		if (vscode.env.uiKind === vscode.UIKind.Web) {
+			// on web, secrets are stored in-memory, which is useless - we don't want users to constantly reauthenticate to JungleTV environments
+			// use a less safe but more useful secret storage
+			this.secretStorage = new UnsafeSecretStorage(async (): Promise<string | undefined> => {
+				return Promise.resolve(this.ctx.globalState.get(GlobalStateKeys.UnsafeSecrets, undefined));
+			}, async (blob: string) => {
+				await this.ctx.globalState.update(GlobalStateKeys.UnsafeSecrets, blob);
+			}, "oj44VOcMgfUINqEKzNm9wmEyfUZSD1Kev0mWgHzmVws=");
+		}
 	}
 
 	public async activate() {
@@ -184,23 +197,23 @@ class JungleTVExtensionImpl implements JungleTVExtension {
 
 	private async getAuthSecretForEndpoint(endpoint: string): Promise<string | undefined> {
 		const h = await this.hashEndpoint(endpoint);
-		const expiryString = await this.ctx.secrets.get(`jungletvaf.endpointsecretexpiry.${h}`);
+		const expiryString = await this.secretStorage.get(`jungletvaf.endpointsecretexpiry.${h}`);
 		if (new Date(Number(expiryString)).getTime() < Date.now()) {
 			return undefined;
 		}
-		return await this.ctx.secrets.get(`jungletvaf.endpointsecret.${await this.hashEndpoint(endpoint)}`);
+		return await this.secretStorage.get(`jungletvaf.endpointsecret.${await this.hashEndpoint(endpoint)}`);
 	}
 
 	private async setAuthSecretForEndpoint(endpoint: string, secret: string, expiry: Date): Promise<void> {
 		const h = await this.hashEndpoint(endpoint);
-		await this.ctx.secrets.store(`jungletvaf.endpointsecretexpiry.${h}`, expiry.getTime().toString());
-		await this.ctx.secrets.store(`jungletvaf.endpointsecret.${h}`, secret);
+		await this.secretStorage.store(`jungletvaf.endpointsecretexpiry.${h}`, expiry.getTime().toString());
+		await this.secretStorage.store(`jungletvaf.endpointsecret.${h}`, secret);
 	}
 
 	private async forgetAuthSecretForEndpoint(endpoint: string) {
 		const h = await this.hashEndpoint(endpoint);
-		await this.ctx.secrets.delete(`jungletvaf.endpointsecretexpiry.${h}`);
-		await this.ctx.secrets.delete(`jungletvaf.endpointsecret.${h}`);
+		await this.secretStorage.delete(`jungletvaf.endpointsecretexpiry.${h}`);
+		await this.secretStorage.delete(`jungletvaf.endpointsecret.${h}`);
 	}
 
 	async getConfiguredEnvironments(): Promise<string[]> {

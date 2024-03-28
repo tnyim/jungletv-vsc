@@ -2,7 +2,7 @@
 	"name": "jungletv-vsc",
 	"displayName": "JungleTV AF development helper",
 	"description": "Helper for developing applications targeting the JungleTV Application Framework",
-	"version": "0.2.5",
+	"version": "0.3.0",
 	"publisher": "jungletv-team",
 	"private": true,
 	"license": "MIT",
@@ -294,11 +294,11 @@
 		"@typescript-eslint/eslint-plugin": "^5.42.0",
 		"@typescript-eslint/parser": "^5.42.0",
 		"@vscode/debugadapter": "^1.59.0",
-		"@vscode/vsce": "^2.19.0",
+		"@vscode/vsce": "^2.24.0",
 		"eslint": "^8.26.0",
 		"protoc-gen-js": "^3.21.2",
-		"ts-protoc-gen": "^0.15.0",
 		"ts-loader": "^7.0.5",
+		"ts-protoc-gen": "^0.15.0",
 		"typescript": "^5.0.2",
 		"url": "^0.11.0",
 		"webpack": "^5.75.0",
@@ -306,9 +306,9 @@
 	},
 	"dependencies": {
 		"@improbable-eng/grpc-web": "^0.15.0",
-		"@types/google-protobuf": "^3.21.2",
+		"@types/google-protobuf": "^3.15.12",
 		"async-mutex": "^0.4.0",
-		"path-browserify": "^1.0.1",
-		"google-protobuf": "^3.21.2"
+		"google-protobuf": "^3.21.2",
+		"path-browserify": "^1.0.1"
 	}
 }
